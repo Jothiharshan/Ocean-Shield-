@@ -53,6 +53,23 @@ const METEO_HOUR_SERVICES = [
   { hour: "23:00", task: "National Disaster Response Sighting Feed", status: "completed", alert: "Low" },
 ];
 
+const METEO_STATIONS = [
+  { name: "Visakhapatnam Port", region: "Bay of Bengal", tempC: 31, humidity: 82, pressure: 1008, wind: "SSW 18 kt", alert: "High Wave Advisory", sst: 29.5, lat: "17.68° N", lng: "83.21° E", climate: "Tropical Wet & Dry", anomaly: "+0.8°C" },
+  { name: "Kakinada Coast", region: "Bay of Bengal", tempC: 30, humidity: 85, pressure: 1007, wind: "S 22 kt", alert: "Storm Surge Alert", sst: 29.8, lat: "16.98° N", lng: "82.24° E", climate: "Tropical Savanna", anomaly: "+1.2°C" },
+  { name: "Chennai Harbour", region: "Indian Ocean", tempC: 33, humidity: 76, pressure: 1010, wind: "E 12 kt", alert: "Heatwave Alert", sst: 29.1, lat: "13.08° N", lng: "80.27° E", climate: "Tropical Semi-Arid", anomaly: "+0.4°C" },
+  { name: "Mumbai Marine Drive", region: "Arabian Sea", tempC: 28, humidity: 91, pressure: 1005, wind: "WNW 26 kt", alert: "Gale Warning", sst: 28.3, lat: "18.93° N", lng: "72.82° E", climate: "Tropical Monsoon", anomaly: "+0.9°C" },
+  { name: "Kathmandu Valley", region: "Himalayas", tempC: 24, humidity: 62, pressure: 1014, wind: "CALM", alert: "Landslide Warning", sst: 18.5, lat: "27.71° N", lng: "85.32° E", climate: "Subtropical Highland", anomaly: "-0.2°C" },
+  { name: "Colombo Anchorage", region: "Laccadive Sea", tempC: 29, humidity: 88, pressure: 1009, wind: "SW 20 kt", alert: "Squalls Advisory", sst: 28.9, lat: "6.92° N", lng: "79.86° E", climate: "Tropical Rainforest", anomaly: "+0.5°C" },
+  { name: "Port Blair", region: "Andaman Sea", tempC: 27, humidity: 90, pressure: 1006, wind: "WSW 24 kt", alert: "Monsoon Inundation", sst: 29.2, lat: "11.62° N", lng: "92.73° E", climate: "Tropical Monsoon", anomaly: "+1.1°C" },
+];
+
+const CLIMATE_ANOMALY_TRENDS: Record<string, number[]> = {
+  "2023": [0.65, 0.72, 0.68, 0.82, 0.94, 0.91, 0.88, 0.85, 0.79, 0.83, 0.89, 0.92],
+  "2024": [0.74, 0.81, 0.79, 0.91, 1.05, 1.02, 0.98, 0.95, 0.89, 0.92, 0.98, 1.04],
+  "2025": [0.85, 0.89, 0.86, 0.98, 1.12, 1.09, 1.04, 1.01, 0.96, 0.99, 1.06, 1.15],
+  "2026": [0.92, 0.97, 0.94, 1.06, 1.22, 1.18, 1.12, 1.09, 1.03, 1.07, 1.14, 1.25]
+};
+
 const DEEP_SEA_FLEET_DATA = [
   { name: "Amalia", fuel: [45, 52, 48, 61, 55, 72, 68], overconsumption: 28, status: "Active", mechanicalAlert: "Mild cavitation detected in starboard rudder assembly" },
   { name: "John", fuel: [38, 42, 41, 44, 43, 49, 45], overconsumption: 12, status: "Normal", mechanicalAlert: "None - all diagnostic parameters pristine" },
@@ -85,6 +102,39 @@ export default function IntegratedWorkspaces() {
 
   // States for Meteorological Forecasting (Workspace 7)
   const [metSelectedDay, setMetSelectedDay] = useState<number>(18);
+  const [selectedWeatherStation, setSelectedWeatherStation] = useState<string>("Visakhapatnam Port");
+  const [tempUnit, setTempUnit] = useState<"C" | "F">("C");
+  const [meteorologicalSearchQuery, setMeteorologicalSearchQuery] = useState<string>("");
+  const [isMeteoScanning, setIsMeteoScanning] = useState<boolean>(false);
+  const [meteoScanProgress, setMeteoScanProgress] = useState<number>(0);
+  const [climateTrendYear, setClimateTrendYear] = useState<string>("2026");
+  const [scanMessage, setScanMessage] = useState<string>("STANDBY: Sensor Array Calibrated");
+
+  // Timer Effect for meteorological radar weather scanning component
+  useEffect(() => {
+    let timer: any;
+    if (isMeteoScanning) {
+      timer = setInterval(() => {
+        setMeteoScanProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(timer);
+            setIsMeteoScanning(false);
+            const alerts = [
+              "SCAN SUCCESS: High pressure ridge validated over Bay of Bengal.",
+              "SCAN SUCCESS: Heavy convective clouds detected; precipitation forecast raised.",
+              "SCAN SUCCESS: Sea Surface Temp anomaly stable. Climate deviation +0.65°C.",
+              "SCAN SUCCESS: Safe zones clearance green. Mild winds at 14 knots.",
+              "SCAN SUCCESS: Extreme localized winds and gale warnings updated."
+            ];
+            setScanMessage(alerts[Math.floor(Math.random() * alerts.length)]);
+            return 0;
+          }
+          return prev + 10;
+        });
+      }, 150);
+    }
+    return () => clearInterval(timer);
+  }, [isMeteoScanning]);
 
   // States for APSDMA Decision Support GIS (Workspace 8)
   const [activeDssLayers, setActiveDssLayers] = useState<string[]>(["Rainfall", "Cyclone Track", "Lightning"]);
@@ -984,7 +1034,15 @@ export default function IntegratedWorkspaces() {
                         <path d="M 95 38 Q 105 28, 110 42 T 120 40 L 115 65 Z" fill="rgba(234,179,8,0.6)" stroke="#eab308" strokeWidth="1" />
                         
                         <text x="110" y="45" fill="#ffffff" fontSize="7" fontWeight="bold" textAnchor="middle">Heavy Precipitation Nucleus</text>
+                        {/* Interactive scan circle line */}
+                        {isMeteoScanning && (
+                          <line x1="0" y1={meteoScanProgress} x2="200" y2={meteoScanProgress} stroke="#22d3ee" strokeWidth="1.5" className="opacity-85" />
+                        )}
                       </svg>
+                      {/* Radar sweep flash overlay */}
+                      {isMeteoScanning && (
+                        <div className="absolute inset-0 bg-cyan-500/5 pointer-events-none animate-pulse" />
+                      )}
                     </div>
                   </div>
 
@@ -1006,6 +1064,245 @@ export default function IntegratedWorkspaces() {
                           </span>
                         </div>
                       ))}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* ================= NEW LIVE WEATHER CHECKER & MONITORING PANEL ================= */}
+                <div className="bg-slate-950 rounded-xl border border-slate-850 p-4.5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
+                    <div className="flex items-center gap-2">
+                      <CloudLightning className="w-5 h-5 text-cyan-400 shrink-0" />
+                      <div>
+                        <h3 className="text-sm font-black text-slate-100 uppercase tracking-tight">Weather Checking & Climate Monitor</h3>
+                        <p className="text-[10px] font-mono text-slate-400">Live multi-station query cockpit and historical sea temperature anomalies</p>
+                      </div>
+                    </div>
+
+                    {/* Unit Switcher C / F */}
+                    <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 p-1 rounded-lg">
+                      <button 
+                        onClick={() => setTempUnit("C")} 
+                        className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition ${tempUnit === "C" ? "bg-cyan-500 text-slate-950 font-black scale-100" : "text-slate-400 hover:text-slate-200"}`}
+                      >
+                        °C
+                      </button>
+                      <button 
+                        onClick={() => setTempUnit("F")} 
+                        className={`px-2.5 py-1 text-xs font-mono font-bold rounded-md transition ${tempUnit === "F" ? "bg-cyan-500 text-slate-950 font-black scale-100" : "text-slate-400 hover:text-slate-200"}`}
+                      >
+                        °F
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                    
+                    {/* Left Column: Quick Stations Search list (5 cols) */}
+                    <div className="md:col-span-5 space-y-3">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                        <input 
+                          type="text" 
+                          placeholder="Search station or region..." 
+                          value={meteorologicalSearchQuery}
+                          onChange={(e) => setMeteorologicalSearchQuery(e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-2 text-xs font-sans text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-550"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                        {METEO_STATIONS.filter(st => {
+                          const query = meteorologicalSearchQuery.toLowerCase();
+                          return st.name.toLowerCase().includes(query) || st.region.toLowerCase().includes(query);
+                        }).map((st) => {
+                          const isSel = selectedWeatherStation === st.name;
+                          const showTemp = tempUnit === "C" ? `${st.tempC}°C` : `${Math.round((st.tempC * 9/5) + 32)}°F`;
+                          return (
+                            <button
+                              key={st.name}
+                              onClick={() => setSelectedWeatherStation(st.name)}
+                              className={`w-full text-left p-2.5 rounded-lg border transition ${
+                                isSel 
+                                  ? "bg-cyan-950/30 border-cyan-500/50 text-cyan-400 hover:bg-cyan-950/45" 
+                                  : "bg-slate-900 border-slate-850 text-slate-300 hover:bg-slate-850 hover:border-slate-800"
+                              } flex items-center justify-between text-xs font-sans`}
+                            >
+                              <div>
+                                <span className="font-bold block text-[11.5px] leading-tight">{st.name}</span>
+                                <span className="text-[9.5px] text-slate-500 font-mono italic block mt-0.5">{st.region}</span>
+                              </div>
+                              <div className="text-right flex items-center gap-1.5 font-mono">
+                                <span className="font-black bg-slate-950/60 px-1.5 py-0.5 rounded border border-slate-800 leading-none">{showTemp}</span>
+                                <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Right Column: Selected Station Details (7 cols) */}
+                    <div className="md:col-span-7 bg-slate-900 border border-slate-850 p-4 rounded-xl space-y-4">
+                      {(() => {
+                        const currentStation = METEO_STATIONS.find(s => s.name === selectedWeatherStation) || METEO_STATIONS[0];
+                        const displayTemp = tempUnit === "C" ? `${currentStation.tempC}°C` : `${Math.round((currentStation.tempC * 9/5) + 32)}°F`;
+                        
+                        return (
+                          <>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <span className="text-[9px] font-mono text-cyan-400 font-black tracking-widest block uppercase">STATION METADATA & TELEMETRY</span>
+                                <h4 className="text-base font-black text-slate-100 font-sans tracking-tight mt-0.5">{currentStation.name}</h4>
+                                <span className="text-[10px] font-mono text-slate-400 bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded font-bold inline-block mt-1">
+                                  GPS: {currentStation.lat}, {currentStation.lng}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[9px] font-mono text-slate-500 font-extrabold uppercase block">Climate Zone</span>
+                                <span className="text-xs font-bold text-teal-400 font-sans">{currentStation.climate}</span>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                              <div className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-center">
+                                <span className="text-[9px] font-mono text-slate-500 block">Temperature</span>
+                                <span className="text-sm font-black text-slate-200 font-mono tracking-tight block mt-0.5">{displayTemp}</span>
+                              </div>
+                              <div className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-center">
+                                <span className="text-[9px] font-mono text-slate-500 block">Humidity</span>
+                                <span className="text-sm font-black text-slate-200 font-mono tracking-tight block mt-0.5">{currentStation.humidity}%</span>
+                              </div>
+                              <div className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-center">
+                                <span className="text-[9px] font-mono text-slate-500 block">Pressure</span>
+                                <span className="text-sm font-black text-slate-200 font-mono tracking-tight block mt-0.5">{currentStation.pressure} hPa</span>
+                              </div>
+                              <div className="bg-slate-950 border border-slate-850 rounded-lg p-2 text-center">
+                                <span className="text-[9px] font-mono text-slate-500 block">Wind Vector</span>
+                                <span className="text-xs font-black text-cyan-400 font-mono tracking-tight block mt-1 leading-none">{currentStation.wind}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between bg-slate-950 border border-slate-850 px-3 py-2.5 rounded-lg text-xs font-mono">
+                              <div className="flex items-center gap-1.5">
+                                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                                <span className="text-[11px] text-slate-400">Alert Advisory:</span>
+                              </div>
+                              <span className={`text-[10px] uppercase font-black px-1.5 py-0.2 rounded ${
+                                currentStation.alert === "None" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse"
+                              }`}>
+                                {currentStation.alert}
+                              </span>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                  </div>
+
+                  {/* ================= MONITORING HISTORICAL SST TRENDS ================= */}
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-xl p-4 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[9px] font-mono text-cyan-400 font-black tracking-widest block uppercase">GLOBAL CLIMATE TREND MONITORING</span>
+                        <h4 className="text-xs font-black text-slate-200 font-sans tracking-tight block mt-0.5">SST (Sea Surface Temperature) Monthly Anomaly Curves</h4>
+                      </div>
+
+                      {/* Year Selector buttons */}
+                      <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 p-1 rounded-lg">
+                        {["2023", "2024", "2025", "2026"].map((yr) => (
+                          <button
+                            key={yr}
+                            onClick={() => setClimateTrendYear(yr)}
+                            className={`px-2.5 py-1 text-[10.5px] font-mono font-black rounded-md transition ${
+                              climateTrendYear === yr 
+                                ? "bg-cyan-500 text-slate-950 font-black scale-100" 
+                                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                            }`}
+                          >
+                            {yr}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Chart Container */}
+                    <div className="space-y-2">
+                      <div className="h-28 bg-slate-950 rounded-xl border border-slate-800/80 p-2 relative flex items-end justify-between overflow-hidden">
+                        
+                        {/* Render simple high-fidelity spline representation bar-lines */}
+                        <div className="absolute inset-0 flex items-stretch justify-around px-4 pt-4 pb-2 z-0">
+                          {(() => {
+                            const data = CLIMATE_ANOMALY_TRENDS[climateTrendYear] || CLIMATE_ANOMALY_TRENDS["2026"];
+                            return data.map((val, idx) => {
+                              // range 0.5 to 1.5. Calculate height percentage
+                              const percentage = Math.round(((val - 0.5) / 1.0) * 100);
+                              const heightPx = Math.max(10, Math.min(percentage, 100));
+                              // color ranges
+                              let barColor = "bg-cyan-500/20 hover:bg-cyan-400 border-cyan-500/20";
+                              if (val > 1.1) barColor = "bg-red-500/35 hover:bg-red-400 border-red-500/35";
+                              else if (val > 0.9) barColor = "bg-orange-500/35 hover:bg-orange-400 border-orange-500/35";
+                              else if (val > 0.7) barColor = "bg-yellow-500/35 hover:bg-yellow-400 border-yellow-500/35";
+
+                              return (
+                                <div key={idx} className="flex flex-col items-center justify-end flex-1 mx-1 group cursor-pointer">
+                                  <span className="text-[8px] font-mono text-slate-400 opacity-0 group-hover:opacity-100 transition duration-150 mb-0.5 font-bold">+{val}°C</span>
+                                  <div className={`w-full rounded-md border ${barColor} transition-all duration-300`} style={{ height: `${heightPx}%` }} />
+                                </div>
+                              );
+                            });
+                          })()}
+                        </div>
+
+                      </div>
+
+                      {/* X-axis months indicator */}
+                      <div className="flex justify-between px-4 text-[9px] font-mono text-slate-500 font-extrabold select-none">
+                        {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map(m => (
+                          <span key={m}>{m}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ================= RADAR WEATHER MONITOR SCANNING ACTION ================= */}
+                  <div className="bg-slate-900 border border-slate-850 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <div className={`p-2 rounded-xl border ${isMeteoScanning ? "bg-cyan-950/40 border-cyan-500/30 text-cyan-400 animate-spin" : "bg-slate-950 border-slate-850 text-slate-400"}`}>
+                        <RefreshCw className="w-5 h-5 shrink-0" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-mono text-slate-500 block leading-none font-bold">ATMOSPHERIC RADAR PROBE</span>
+                        <p className="text-[11.5px] font-mono text-slate-300 font-bold block">{scanMessage}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+                      {isMeteoScanning && (
+                        <div className="w-24 bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800 shrink-0">
+                          <div className="bg-cyan-500 h-full rounded-full transition-all duration-150" style={{ width: `${meteoScanProgress}%` }} />
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          if (isMeteoScanning) return;
+                          setIsMeteoScanning(true);
+                          setMeteoScanProgress(0);
+                          setScanMessage("SCANNING: Initiating Multi-Orbit Spectral Sweep...");
+                        }}
+                        disabled={isMeteoScanning}
+                        className={`px-4 py-2 text-xs font-mono font-black uppercase rounded-lg border transition cursor-pointer flex items-center gap-2 ${
+                          isMeteoScanning 
+                            ? "bg-cyan-950/30 border-cyan-500/30 text-cyan-500 opacity-60 cursor-not-allowed" 
+                            : "bg-cyan-500 text-slate-950 border-cyan-400 hover:bg-cyan-400 hover:scale-[1.02] shadow-sm active:scale-[0.98]"
+                        }`}
+                      >
+                        <Play className="w-3.5 h-3.5 shrink-0" fill="currentColor" />
+                        <span>{isMeteoScanning ? "Scanning..." : "Sync Radar"}</span>
+                      </button>
                     </div>
                   </div>
 

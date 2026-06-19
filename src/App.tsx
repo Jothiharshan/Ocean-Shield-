@@ -1171,6 +1171,36 @@ export default function App() {
                 onSelectReport={setSelectedReportId}
                 onSelectCoordinates={handleSelectCoordinatesOnMap}
               />
+
+              {/* Dynamic GIS Map Legend Overlay */}
+              <div className="absolute bottom-4 left-4 bg-slate-950/95 border border-slate-800 rounded-xl p-3.5 shadow-2xl z-10 max-w-[240px] backdrop-blur-md">
+                <span className="text-[10px] font-mono text-cyan-400 font-extrabold tracking-widest block uppercase mb-2">
+                  GIS LAYER LEGEND
+                </span>
+                <div className="space-y-1.5">
+                  {[
+                    { key: "oil_spill", label: "Oil Spill / Discharges", color: "bg-red-500", border: "border-red-400/50" },
+                    { key: "coral_bleaching", label: "Coral Bleaching Hotspots", color: "bg-amber-500", border: "border-amber-400/50" },
+                    { key: "illegal_fishing", label: "Illegal Fishery Incidents", color: "bg-emerald-500", border: "border-emerald-400/50" },
+                    { key: "toxic_algae", label: "Harmful Algae Blooms", color: "bg-pink-500", border: "border-pink-400/50" },
+                    { key: "severe_weather", label: "Severe Marine Weather", color: "bg-sky-500", border: "border-sky-400/50" },
+                    { key: "marine_debris", label: "Debris & Trash Clusters", color: "bg-slate-500", border: "border-slate-400/50" }
+                  ].map(item => {
+                    const count = reports.filter(r => r.category === item.key).length;
+                    return (
+                      <div key={item.key} className="flex items-center justify-between gap-3 text-[10.5px] font-mono leading-none">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${item.color} border ${item.border} shadow-sm shrink-0`} />
+                          <span className="text-slate-300 font-sans font-medium">{item.label}</span>
+                        </div>
+                        <span className="bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 font-bold text-slate-400 leading-none">
+                          {count}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
