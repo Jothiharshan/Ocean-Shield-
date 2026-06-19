@@ -449,7 +449,7 @@ export default function App() {
 
       {/* CORE WEB CONSOLE HORIZONTAL HEADER */}
       <header className="bg-slate-900 border-b border-slate-850 p-4 shrink-0 relative z-30">
-        <div className="max-w-7xl mx-auto flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+        <div className="w-full max-w-7xl xl:max-w-[1440px] 2xl:max-w-[1600px] mx-auto flex flex-col lg:flex-row lg:flex-wrap 2xl:flex-nowrap lg:items-center lg:justify-between gap-4">
           
           {/* Logo Brand Sighting Block */}
           <div className="flex items-center gap-3">
@@ -466,12 +466,12 @@ export default function App() {
                   AI + CORE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-450 font-semibold">NASA-vibe Ocean Hazard & Sighting Dispatch Monitor</p>
+              <p className="text-[11px] text-slate-450 font-semibold hidden sm:block">NASA-vibe Ocean Hazard & Sighting Dispatch Monitor</p>
             </div>
           </div>
 
           {/* DYNAMIC NAVIGATION GRID (WELL ALIGNED IN VERTICAL & HORIZONTAL PLANES WITH MULTI-ROW SEGMENTS) */}
-          <nav className="flex flex-col gap-2 p-2 bg-slate-950/20 dark:bg-slate-950/20 light:bg-[#f1f5f9]/50 border border-slate-850 dark:border-slate-850 light:border-slate-200/85 rounded-3xl shrink-0 min-w-[325px] sm:min-w-[420px] lg:min-w-[580px] max-w-full">
+          <nav className="flex flex-col gap-2 p-2 bg-slate-950/20 dark:bg-slate-950/20 light:bg-[#f1f5f9]/50 border border-slate-850 dark:border-slate-850 light:border-slate-200/85 rounded-3xl shrink lg:shrink-0 lg:min-w-0 max-w-full">
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 onClick={() => setActiveTab("landing")}
@@ -510,11 +510,12 @@ export default function App() {
           </nav>
 
           {/* Theme, Demo Clearance & Auth Status Area */}
-          <div className="flex items-center gap-2.5 shrink-0 ml-auto xl:ml-0 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-2.5 ml-auto lg:ml-0 flex-wrap shrink-0">
             
             {/* PERSISTENT DEMO SYSTEM ROLE SWITCHER */}
-            <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-850 h-9 sm:h-10">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">Demo Clearance:</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-950 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-slate-850 h-9 sm:h-10 shrink-0">
+              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase hidden md:inline xl:hidden 2xl:inline">Demo Clearance:</span>
+              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase hidden sm:inline md:hidden xl:inline 2xl:hidden">Clearance:</span>
               <select
                 value={sessionUser ? sessionUser.role : "Citizen"}
                 onChange={(e) => {
@@ -534,7 +535,7 @@ export default function App() {
                   }
                   setActiveTab("dashboard");
                 }}
-                className="bg-transparent text-cyan-405 font-mono font-bold text-[10px] outline-none border-none py-0 cursor-pointer select-none"
+                className="bg-transparent text-cyan-400 font-mono font-bold text-[10px] outline-none border-none py-0 cursor-pointer select-none"
               >
                 <option value="Citizen" className="bg-slate-900 text-slate-100">Citizen</option>
                 <option value="Fisherman" className="bg-slate-900 text-slate-100">Fisherman</option>
@@ -560,17 +561,17 @@ export default function App() {
 
             {/* Auth Profile / Login action */}
             {sessionUser ? (
-              <div className="flex items-center gap-3 bg-slate-955 dark:bg-slate-950 p-1.5 pr-3.5 rounded-2xl border border-slate-850 dark:border-slate-850 shadow-sm h-9 sm:h-10">
-                <div className="w-6.5 h-6.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/10 flex items-center justify-center font-bold text-[11px] select-none">
+              <div className="flex items-center gap-2 sm:gap-3 bg-slate-955 dark:bg-slate-950 p-1 sm:p-1.5 pr-2.5 sm:pr-3.5 rounded-2xl border border-slate-850 dark:border-slate-850 shadow-sm h-9 sm:h-10 shrink-0">
+                <div className="w-6.5 h-6.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/10 flex items-center justify-center font-bold text-[11px] select-none shrink-0">
                   JO
                 </div>
-                <div className="text-left select-none leading-none pr-1">
-                  <h4 className="text-[11px] font-bold text-slate-100 tracking-wide leading-tight">{sessionUser.name}</h4>
+                <div className="hidden sm:block text-left select-none leading-none pr-1 max-w-[120px] xl:max-w-[100px] 2xl:max-w-none">
+                  <h4 className="text-[11px] font-bold text-slate-100 tracking-wide leading-tight truncate">{sessionUser.name}</h4>
                   <p className="text-[9px] text-slate-500 font-bold font-mono uppercase tracking-widest">{sessionUser.role}</p>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="text-slate-400 hover:text-red-400 p-0.5 rounded transition cursor-pointer"
+                  className="text-slate-400 hover:text-red-400 p-0.5 rounded transition cursor-pointer shrink-0"
                   title="Disconnect telemetry link"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -579,7 +580,7 @@ export default function App() {
             ) : (
               <button
                 onClick={() => handleGuestAutoLogin("dashboard")}
-                className="bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition shadow-md cursor-pointer font-heading"
+                className="bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition shadow-md cursor-pointer font-heading shrink-0"
               >
                 Operator Login
               </button>
@@ -646,27 +647,35 @@ export default function App() {
                 <div className="absolute inset-0 bg-cyan-500/5 rounded-full blur-[80px] pointer-events-none" />
                 
                 <div className="relative w-80 h-80 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden glow-cyan">
+                  {/* Real high-fidelity rotating radar sweep sector */}
+                  <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_50%,rgba(6,182,212,0.18)_100%)] rounded-full animate-sweep origin-center pointer-events-none z-10" />
+
+                  {/* Radial sweep hand line to guide focus */}
+                  <div className="absolute inset-0 animate-sweep origin-center pointer-events-none z-10" style={{ animationDuration: "12s" }}>
+                    <div className="absolute top-0 left-1/2 -ml-[0.5px] w-[1px] h-1/2 bg-cyan-400/40" />
+                  </div>
+
                   {/* Sweep grid lines overlay */}
-                  <div className="absolute inset-4 border border-dashed border-cyan-500/10 rounded-full animate-sweep" />
+                  <div className="absolute inset-4 border border-dashed border-cyan-500/10 rounded-full animate-sweep" style={{ animationDuration: "30s" }} />
                   <div className="absolute inset-16 border border-slate-850 rounded-full" />
-                  <div className="absolute inset-28 border border-dashed border-cyan-500/5 rounded-full animate-spin" style={{ animationDuration: "20s" }} />
+                  <div className="absolute inset-28 border border-dashed border-cyan-500/15 rounded-full animate-sweep" style={{ animationDuration: "15s", animationDirection: "reverse" }} />
 
                   {/* Dynamic coordinate marker dots flashing */}
-                  <span className="absolute top-24 left-24 w-3.5 h-3.5 bg-red-500 border-2 border-slate-950 rounded-full animate-ping" />
-                  <span className="absolute top-24 left-24 w-2 h-2 bg-red-400 rounded-full" />
+                  <span className="absolute top-24 left-24 w-3.5 h-3.5 bg-red-500 border-2 border-slate-950 rounded-full animate-ping z-20" />
+                  <span className="absolute top-24 left-24 w-2 h-2 bg-red-400 rounded-full z-20" />
 
-                  <span className="absolute bottom-28 right-24 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full animate-bounce" />
-                  <span className="absolute bottom-28 right-24 w-2 h-2 bg-emerald-450 rounded-full" />
+                  <span className="absolute bottom-28 right-24 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-950 rounded-full animate-bounce z-20" />
+                  <span className="absolute bottom-28 right-24 w-2 h-2 bg-emerald-450 rounded-full z-20" />
 
-                  <span className="absolute top-36 right-36 w-3 h-3 bg-amber-500 border border-slate-900 rounded-full animate-pulse" />
+                  <span className="absolute top-36 right-36 w-3 h-3 bg-amber-500 border border-slate-900 rounded-full animate-pulse z-20" />
 
                   {/* Compass grid readouts */}
-                  <div className="absolute bottom-4 text-center font-mono text-[9px] text-slate-500 tracking-widest font-black uppercase">
+                  <div className="absolute bottom-4 text-center font-mono text-[9px] text-slate-500 tracking-widest font-black uppercase z-20">
                     SYS RADAR OVERWATCH SENSING
                   </div>
                   
-                  <div className="flex flex-col items-center gap-1">
-                    <Compass className="w-16 h-16 text-cyan-400/80 animate-spin" style={{ animationDuration: "40s" }} />
+                  <div className="flex flex-col items-center gap-1 z-20">
+                    <Compass className="w-16 h-16 text-cyan-400/80 animate-sweep" style={{ animationDuration: "10s" }} />
                     <span className="text-[10px] font-mono text-cyan-300 font-extrabold tracking-widest">N 14.542°</span>
                   </div>
                 </div>

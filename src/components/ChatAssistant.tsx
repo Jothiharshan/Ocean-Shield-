@@ -90,16 +90,66 @@ export default function ChatAssistant({ currentUserRole }: ChatAssistantProps) {
         throw new Error(data.error);
       }
     } catch (err: any) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `ai-err-${Date.now()}`,
-          sender: "ai",
-          content: `Incident Report Error: Failed to established secure communication link with OceanShield Satellite base. Reason: ${err.message || "Endpoint timeout"}`,
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
+      console.warn("Satellite link offline. Switching to client-side co-pilot simulator.", err);
+      
+      const lowerText = textToSend.toLowerCase();
+      let simResponse = "";
+
+      if (lowerText.includes("diesel") || lowerText.includes("spill") || lowerText.includes("oil")) {
+        simResponse = `[SIMULATED ADVISORY - CRITICAL SPILL RESPONSE]
+        To contain a localized petroleum/diesel spill with local maritime gear:
+        
+        1. Deploy high-capacity coconut coir absorbent booms or straws around the spill perimeter immediately to stop active drift.
+        2. Avoid using general household detergents; they sink petroleum droplets into benthic seagrass zones, compounding ecological damage.
+        3. Establish temporary exclusion coordinates at the spill coordinates (e.g. 14.48° N, 120.30° E) to protect fishing gear.
+        4. Coordinate with coast guard command on VHF frequency 16 with a tier rating update.`;
+      } else if (lowerText.includes("bleach") || lowerText.includes("reef") || lowerText.includes("coral")) {
+        simResponse = `[SIMULATED ADVISORY - BIO-MONITORING PROTOCOL]
+        Coral Bleaching documentation protocol for academic or local observers:
+        
+        1. Establish a 50-meter line transect across the reef flat contouring constant depth.
+        2. Take photographs at 1-meter intervals straight down using a 0.25m² quadrant frame.
+        3. Match live corals against the Coral Health Color Chart (levels 1-6) to record pigmentation.
+        4. Look for early signs of micro-fluorescence, which indicates high UV thermal shock before full bleaching.`;
+      } else if (lowerText.includes("tide") || lowerText.includes("algae") || lowerText.includes("algal")) {
+        simResponse = `[SIMULATED ADVISORY - HARMFUL ALGAL BLOOMS]
+        Safety protocols during suspected Pyrodinium or Gymnodinium toxic algae events:
+        
+        1. Keep shellfish harvest (oysters, mussels, clams) completely suspended inside affected coordinate strips.
+        2. Fish are generally safe for consumption on the condition that all gills, skin, and interior digestive viscera are thoroughly excised prior to cooking.
+        3. Standard boiling or cooking completely FAILS to neutralize algae biotoxins (like saxitoxins). Keep observation logs active.`;
+      } else if (lowerText.includes("ais") || lowerText.includes("trawler") || lowerText.includes("illegal")) {
+        simResponse = `[SIMULATED ADVISORY - MARITIME LAW COMPLIANCE]
+        Standard operating protocols for encounters with suspected sanctuary encroachers:
+        
+        1. Keep safe visual tracking distance. Never initiate direct physical intervention or boarding.
+        2. Log physical vessel silhouettes, marine registry hull markings, estimated heading speed vectors, and transponder status.
+        3. Record high-definition photo/video timestamp records and plot coordinates inside the Sighting Scribe to notify command control.`;
+      } else {
+        simResponse = `[SIMULATED ADVISORY - GENERAL TACTICAL WAVE]
+        OceanShield AI Subsystem received inquiry: "${textToSend}".
+        
+        Active telemetry variables:
+        • Manila Bay Surface Temp: 30.2°C (Anomalous +1.4°C)
+        • Regional Wind Drift: SW at 12 knots heading to Bataan Shore
+        • Grid Sighting Density: 6 verified incident sectors
+        
+        Action Recommended: Continue monitoring the Integrated GIS Ocean Layers Map. Share details of fresh sightings directly using the 'Report Sighting' form to trigger automated alerts.`;
+      }
+
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-sim-${Date.now()}`,
+            sender: "ai",
+            content: simResponse,
+            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          },
+        ]);
+        setIsLoading(false);
+      }, 800);
+      return;
     } finally {
       setIsLoading(false);
     }
