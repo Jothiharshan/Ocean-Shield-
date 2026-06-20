@@ -11,13 +11,36 @@ export default function SocialAnalytics({ socialTrends }: SocialAnalyticsProps) 
   const [searchQuery, setSearchQuery] = useState("");
   const [timeFilter, setTimeFilter] = useState<"24H" | "7D" | "30D" | "Custom">("7D");
 
-  const currentTrend = socialTrends.find((t) => t.keyword === selectedTrendTag) || socialTrends[0];
+  // Dynamically calculate trends based on selected time filter
+  const getDynamicTrend = (trend: SocialTrend) => {
+    const multipliers = {
+      "24H": { vol: 1, pos: 1, neu: 1, neg: 1 },
+      "7D": { vol: 5, pos: 0.9, neu: 1.1, neg: 1.2 },
+      "30D": { vol: 20, pos: 0.7, neu: 1.2, neg: 1.5 },
+      "Custom": { vol: 50, pos: 0.5, neu: 1.5, neg: 2 },
+    };
+    const mult = multipliers[timeFilter];
+    return {
+      ...trend,
+      volume24h: Math.round(trend.volume24h * mult.vol),
+      sentiment: {
+        positive: Math.round(trend.sentiment.positive * mult.pos),
+        neutral: Math.round(trend.sentiment.neutral * mult.neu),
+        negative: Math.round(trend.sentiment.negative * mult.neg),
+      },
+    };
+  };
+
+  const currentTrend = getDynamicTrend(socialTrends.find((t) => t.keyword === selectedTrendTag) || socialTrends[0]);
 
   // Filter trends based on query
-  const filteredTrends = socialTrends.filter(
-    (t) => t.keyword.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           t.topCategory.replace("_", " ").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTrends = socialTrends
+    .map(getDynamicTrend)
+    .filter(
+      (t) =>
+        t.keyword.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.topCategory.replace("_", " ").toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const getSentimentColor = (type: "positive" | "neutral" | "negative") => {
     switch (type) {
@@ -102,7 +125,7 @@ export default function SocialAnalytics({ socialTrends }: SocialAnalyticsProps) 
   ];
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl space-y-6" id="social-analytics-panel">
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 md:p-5 shadow-2xl space-y-6" id="social-analytics-panel">
       
       {/* Header section with Custom Scraper info + TIME FILTER SELECTOR (Phase 5) */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-850">

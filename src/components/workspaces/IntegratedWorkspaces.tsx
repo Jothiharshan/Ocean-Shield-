@@ -29,9 +29,9 @@ const SOFAR_BUOY_TEMPORALS = [
 ];
 
 const FLOOD_TAGS_SOCIAL = [
-  { id: 1, place: "Kerpen, Rhine-Westphalia", count: 3, text: "Severe flooding caused major disruption on Friday in North Rhine-Westphalia #Germany. Rivers overflowed drowning streets.", image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80", time: "12:49, 18 Jul 2026" },
-  { id: 2, place: "Erftstadt Region", count: 12, text: "Rescue boats deployed to evacuate citizens caught in historic landslide torrents following extreme cloudburst precipitation.", image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80", time: "15:22, 18 Jul 2026" },
-  { id: 3, place: "Euskirchen", count: 7, text: "Local dam structures at reservoir limits. Authorities issue immediate downstream flash torrent evacuation warnings.", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80", time: "17:05, 18 Jul 2026" },
+  { id: 1, place: "Kerpen, Rhine-Westphalia", count: 3, text: "Severe flooding caused major disruption on Friday in North Rhine-Westphalia #Germany. Rivers overflowed drowning streets.", image: "https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=600&q=80", time: "12:49, 18 Jul 2026", tags: ["flooding", "rivers", "germany"], cx: 80, cy: 80, r: 16, bubbleCount: "261" },
+  { id: 2, place: "Erftstadt Region", count: 12, text: "Rescue boats deployed to evacuate citizens caught in historic landslide torrents following extreme cloudburst precipitation.", image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=80", time: "15:22, 18 Jul 2026", tags: ["rescue", "landslide", "evacuate"], cx: 150, cy: 120, r: 12, bubbleCount: "89" },
+  { id: 3, place: "Euskirchen", count: 7, text: "Local dam structures at reservoir limits. Authorities issue immediate downstream flash torrent evacuation warnings.", image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80", time: "17:05, 18 Jul 2026", tags: ["dam", "reservoir", "warnings"], cx: 210, cy: 60, r: 10, bubbleCount: "7" },
 ];
 
 const QUAKEMAP_RELIEF_NEEDS = [
@@ -443,6 +443,7 @@ export default function IntegratedWorkspaces() {
   // States for FloodTags Social Map (Workspace 5)
   const [floodTagsQuery, setFloodTagsQuery] = useState("");
   const [selectedPostId, setSelectedPostId] = useState<number>(1);
+  const [selectedFloodTag, setSelectedFloodTag] = useState<string>("all");
 
   // States for Quakemap (Workspace 6)
   const [quakemapFilters, setQuakemapFilters] = useState<string[]>(["Relief Needs", "URGENT HELP NEEDED"]);
@@ -1322,117 +1323,248 @@ export default function IntegratedWorkspaces() {
             )}
 
             {/* WORKSPACE 5: FLOODTAGS SOCIAL MAP */}
-            {activeWorkspace === "flood_tags" && (
-              <div className="space-y-6 text-left animate-fadeIn">
-                
-                {/* Search query input */}
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
-                    <input 
-                      type="text"
-                      placeholder="Filter post tags (e.g. disaster, flood, rain)..."
-                      value={floodTagsQuery}
-                      onChange={(e) => setFloodTagsQuery(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-xs outline-none focus:border-cyan-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Primary split grid (map + detail text side-by-side) */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            {activeWorkspace === "flood_tags" && (() => {
+              // Filter the posts dynamically based on search query AND active tag pill
+              const filteredSocialPosts = FLOOD_TAGS_SOCIAL.filter(post => {
+                const q = floodTagsQuery.trim().toLowerCase();
+                const matchesQuery = !q || 
+                  post.place.toLowerCase().includes(q) || 
+                  post.text.toLowerCase().includes(q) ||
+                  post.tags.some(t => t.toLowerCase().includes(q));
                   
-                  {/* Bubble Map (7 cols) */}
-                  <div className="md:col-span-7 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
-                    <span className="text-[10px] font-mono font-black text-slate-550 uppercase">FLOOD CROWD MAP OVERLAY</span>
-                    
-                    <div className="h-64 bg-slate-900 rounded-xl border border-slate-800 relative flex items-center justify-center overflow-hidden">
-                      {/* Grid design */}
-                      <div className="absolute inset-0 bg-blue-950/10 opacity-30 select-none pointer-events-none">
-                        <svg className="w-full h-full" stroke="rgba(34,211,238,0.06)" strokeWidth="1">
-                          <pattern id="flood-grid" width="30" height="30" patternUnits="userSpaceOnUse">
-                            <path d="M 30 0 L 0 0 0 30" fill="none" />
-                          </pattern>
-                          <rect width="100%" height="100%" fill="url(#flood-grid)" />
-                        </svg>
-                      </div>
+                const matchesTag = selectedFloodTag === "all" || post.tags.includes(selectedFloodTag);
+                return matchesQuery && matchesTag;
+              });
 
-                      {/* Floating bubble clusters resembling screenshot map bubbles */}
-                      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200">
-                        {/* Contours contours */}
-                        <path d="M 20 50 Q 80 40, 120 90 T 220 120 T 290 80" fill="none" stroke="rgba(148, 163, 184, 0.15)" strokeWidth="1" />
-                        <path d="M 30 70 Q 90 60, 130 110 T 230 140 T 300 100" fill="none" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="1" />
+              // Active display post based on selected ID or fall back to the first available filtered item
+              const activePost = filteredSocialPosts.find(p => p.id === selectedPostId) || filteredSocialPosts[0] || null;
 
-                        {/* Blue clusters (circles with counts) */}
-                        <g className="cursor-pointer" onClick={() => setSelectedPostId(1)}>
-                          <circle cx="80" cy="80" r="16" fill="rgba(34,211,238,0.25)" stroke="#22d3ee" strokeWidth="1.5" />
-                          <text x="80" y="84" textAnchor="middle" fill="#22d3ee" fontSize="10" fontWeight="bold">261</text>
-                        </g>
+              return (
+                <div className="space-y-6 text-left animate-fadeIn">
+                  
+                  {/* Search query input and categories */}
+                  <div className="space-y-3.5">
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-slate-500 absolute left-3 top-3.5" />
+                      <input 
+                        type="text"
+                        placeholder="Filter post tags (e.g. disaster, flood, rain)..."
+                        value={floodTagsQuery}
+                        onChange={(e) => {
+                          setFloodTagsQuery(e.target.value);
+                          // Auto-select first matching post on input typing
+                          const firstMatching = FLOOD_TAGS_SOCIAL.filter(post => {
+                            const q = e.target.value.trim().toLowerCase();
+                            const matchesQuery = !q || 
+                              post.place.toLowerCase().includes(q) || 
+                              post.text.toLowerCase().includes(q) ||
+                              post.tags.some(t => t.toLowerCase().includes(q));
+                            const matchesTag = selectedFloodTag === "all" || post.tags.includes(selectedFloodTag);
+                            return matchesQuery && matchesTag;
+                          });
+                          if (firstMatching.length > 0) {
+                            setSelectedPostId(firstMatching[0].id);
+                          }
+                        }}
+                        className="w-full bg-slate-950 border border-slate-800 text-slate-200 pl-10 pr-4 py-3 rounded-xl text-xs outline-none focus:border-cyan-500/80 transition shadow-inner"
+                      />
+                    </div>
 
-                        <g className="cursor-pointer" onClick={() => setSelectedPostId(2)}>
-                          <circle cx="150" cy="120" r="12" fill="rgba(34,211,238,0.25)" stroke="#22d3ee" strokeWidth="1.5" />
-                          <text x="150" y="124" textAnchor="middle" fill="#22d3ee" fontSize="9" fontWeight="bold">89</text>
-                        </g>
-
-                        <g className="cursor-pointer" onClick={() => setSelectedPostId(3)}>
-                          <circle cx="210" cy="60" r="10" fill="rgba(34,211,238,0.25)" stroke="#22d3ee" strokeWidth="1.5" />
-                          <text x="210" y="63" textAnchor="middle" fill="#22d3ee" fontSize="8" fontWeight="bold">7</text>
-                        </g>
-
-                        {/* Smaller auxiliary dots */}
-                        <circle cx="50" cy="110" r="4" fill="#22d3ee" opacity="0.6" />
-                        <circle cx="120" cy="40" r="5" fill="#22d3ee" opacity="0.6" />
-                        <circle cx="250" cy="150" r="4" fill="#22d3ee" opacity="0.6" />
-                      </svg>
-
-                      {/* Mini popup window replicating the map speech alert box */}
-                      <div className="absolute top-4 left-4 right-4 bg-slate-950/95 border border-cyan-500/30 p-2.5 rounded-xl text-[10px] font-mono shadow-xl max-w-[210px] space-y-1">
-                        <div className="text-cyan-400 font-extrabold flex justify-between">
-                          <span>LOCATION IDENTIFIED</span>
-                          <span>ID #2912</span>
-                        </div>
-                        <p className="text-slate-300 leading-tight">Kerpen - 3. Severe flooding caused extreme cloudburst river flows overflow.</p>
-                      </div>
+                    {/* Popular hashtags row */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                      <span className="text-[9.5px] font-mono font-bold tracking-wider text-slate-500 mr-1.5 uppercase">Interactive Filters:</span>
+                      {["all", "flooding", "rivers", "germany", "rescue", "landslide", "evacuate", "dam", "reservoir", "warnings"].map((tag) => {
+                        const isActive = selectedFloodTag === tag;
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => {
+                              setSelectedFloodTag(tag);
+                              // Auto-select first post containing this tag or any if "all"
+                              const matches = FLOOD_TAGS_SOCIAL.filter(p => tag === "all" || p.tags.includes(tag));
+                              if (matches.length > 0) {
+                                setSelectedPostId(matches[0].id);
+                              }
+                            }}
+                            className={`px-2.5 py-1 rounded-lg border text-[9.5px] font-mono tracking-tight uppercase transition-all duration-200 cursor-pointer ${
+                              isActive 
+                                ? "bg-cyan-950/80 border-cyan-500/60 text-cyan-400 font-extrabold shadow-sm shadow-cyan-950" 
+                                : "bg-slate-900 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-850"
+                            }`}
+                          >
+                            #{tag}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Sidebar Photos (5 cols) */}
-                  <div className="md:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4 flex flex-col justify-between">
-                    <span className="text-[10px] font-mono font-black text-slate-450 uppercase tracking-wide block">SOCIAL STREAMS PHOTOS LOG</span>
+                  {/* Primary split grid (map + detail text side-by-side) */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                     
-                    {/* Post Detail Box based on selectedPostId */}
-                    {(() => {
-                      const post = FLOOD_TAGS_SOCIAL.find(p => p.id === selectedPostId) || FLOOD_TAGS_SOCIAL[0];
-                      return (
-                        <div className="space-y-3 flex-1 flex flex-col justify-between">
+                    {/* Bubble Map (7 cols) */}
+                    <div className="md:col-span-7 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono font-black text-slate-450 uppercase tracking-wider block">FLOOD CROWD MAP OVERLAY</span>
+                        <span className="text-[9px] font-mono text-cyan-400/80 bg-cyan-950/20 px-2 py-0.5 rounded border border-cyan-800/20">
+                          {filteredSocialPosts.length} Active Bubble Clusters
+                        </span>
+                      </div>
+                      
+                      <div className="h-64 bg-slate-900 rounded-xl border border-slate-800 relative flex items-center justify-center overflow-hidden">
+                        {/* Grid design */}
+                        <div className="absolute inset-0 bg-blue-950/10 opacity-30 select-none pointer-events-none">
+                          <svg className="w-full h-full" stroke="rgba(34,211,238,0.06)" strokeWidth="1">
+                            <pattern id="flood-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                              <path d="M 30 0 L 0 0 0 30" fill="none" />
+                            </pattern>
+                            <rect width="100%" height="100%" fill="url(#flood-grid)" />
+                          </svg>
+                        </div>
+
+                        {/* Floating bubble clusters resembling screenshot map bubbles */}
+                        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 200">
+                          {/* Contours contours */}
+                          <path d="M 20 50 Q 80 40, 120 90 T 220 120 T 290 80" fill="none" stroke="rgba(148, 163, 184, 0.15)" strokeWidth="1" />
+                          <path d="M 30 70 Q 90 60, 130 110 T 230 140 T 300 100" fill="none" stroke="rgba(148, 163, 184, 0.1)" strokeWidth="1" />
+
+                          {/* Dynamic Interactive Blue clusters (circles with counts) */}
+                          {filteredSocialPosts.map((p) => {
+                            const isSelected = activePost && activePost.id === p.id;
+                            return (
+                              <g 
+                                key={p.id} 
+                                className="cursor-pointer transition-all duration-300 group" 
+                                onClick={() => setSelectedPostId(p.id)}
+                              >
+                                <circle 
+                                  cx={p.cx} 
+                                  cy={p.cy} 
+                                  r={p.r} 
+                                  fill={isSelected ? "rgba(34,211,238,0.35)" : "rgba(34,211,238,0.15)"} 
+                                  stroke={isSelected ? "#22d3ee" : "rgba(34,211,238,0.6)"} 
+                                  strokeWidth={isSelected ? 2.5 : 1.2} 
+                                  className={isSelected ? "animate-pulse" : "group-hover:stroke-cyan-400"}
+                                />
+                                <text 
+                                  x={p.cx} 
+                                  y={p.cy + 3} 
+                                  textAnchor="middle" 
+                                  fill={isSelected ? "#22d3ee" : "rgba(34,211,238,0.8)"} 
+                                  fontSize="8.5" 
+                                  fontWeight={isSelected ? "bold" : "medium"}
+                                  className="select-none pointer-events-none font-mono"
+                                >
+                                  {p.bubbleCount}
+                                </text>
+                              </g>
+                            );
+                          })}
+
+                          {/* Smaller auxiliary dots, only visible if results exist */}
+                          {filteredSocialPosts.length > 0 && (
+                            <>
+                              <circle cx="50" cy="110" r="3.5" fill="#22d3ee" className="animate-pulse" opacity="0.5" />
+                              <circle cx="120" cy="40" r="4.5" fill="#22d3ee" opacity="0.5" />
+                              <circle cx="250" cy="150" r="3.5" fill="#22d3ee" opacity="0.4" />
+                            </>
+                          )}
+                        </svg>
+
+                        {/* Speech alert bubble window dynamically showing current details */}
+                        {activePost ? (
+                          <div className="absolute top-4 left-4 right-4 bg-slate-950/95 border border-cyan-500/35 p-2.5 rounded-xl text-[10px] font-mono shadow-xl max-w-[210px] space-y-1.5 animate-fadeIn">
+                            <div className="text-cyan-400 font-extrabold flex justify-between items-center border-b border-slate-900 pb-1">
+                              <span>LOCATION DETECTED</span>
+                              <span>ID #{activePost.id === 1 ? "2912" : activePost.id === 2 ? "1844" : "4020"}</span>
+                            </div>
+                            <p className="text-slate-200 leading-normal text-[9.5px]">
+                              <span className="font-bold text-white block mb-0.5">{activePost.place}</span>
+                              {activePost.text.length > 75 ? `${activePost.text.substring(0, 75)}...` : activePost.text}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="absolute top-4 left-4 right-4 bg-slate-950/95 border border-red-500/30 p-2.5 rounded-xl text-[10px] font-mono shadow-xl max-w-[210px] space-y-1 animate-fadeIn">
+                            <span className="text-red-400 font-extrabold block">NO BUBBLE DETECTED</span>
+                            <p className="text-slate-400 leading-tight">Please clear search filter query parameters to view crowd incidents.</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Sidebar Photos (5 cols) */}
+                    <div className="md:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4 flex flex-col justify-between min-h-[310px]">
+                      <span className="text-[10px] font-mono font-black text-slate-450 uppercase tracking-wide block">SOCIAL STREAMS PHOTOS LOG</span>
+                      
+                      {/* Post Detail Box based on dynamic activePost */}
+                      {activePost ? (
+                        <div className="space-y-3.5 flex-1 flex flex-col justify-between animate-fadeIn">
                           <div className="relative group overflow-hidden rounded-lg aspect-video border border-slate-800">
                             <img 
-                              src={post.image} 
+                              src={activePost.image} 
                               alt="disaster scene"
+                              referrerPolicy="no-referrer"
                               className="w-full h-full object-cover group-hover:scale-105 transition duration-300" 
                             />
-                            <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-[8px] font-mono text-cyan-400 px-2 py-0.5 rounded">
-                              SOURCE: TWITTER / TELEGRAM
+                            <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-[8px] font-mono text-cyan-400 px-2 py-0.5 rounded font-bold">
+                              SOURCE: {activePost.tags[0]?.toUpperCase() || "SOCIAL"} / TELEGRAM
                             </div>
                           </div>
 
-                          <div className="space-y-1">
-                            <span className="text-xs font-bold text-slate-100 font-sans block">{post.place}</span>
-                            <p className="text-[10.5px] text-slate-400 leading-relaxed font-sans">{post.text}</p>
+                          <div className="space-y-1.5 flex-1 text-left">
+                            <span className="text-xs font-bold text-slate-100 font-sans block">{activePost.place}</span>
+                            <p className="text-[11px] text-slate-350 leading-relaxed font-sans">{activePost.text}</p>
+                            
+                            {/* Tags under description */}
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {activePost.tags.map(t => (
+                                <span 
+                                  key={t} 
+                                  onClick={() => setSelectedFloodTag(t)}
+                                  className={`text-[9.5px] font-mono px-2 py-0.5 rounded cursor-pointer transition ${
+                                    selectedFloodTag === t 
+                                      ? "bg-cyan-950/70 text-cyan-400 border border-cyan-800/50" 
+                                      : "bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300"
+                                  }`}
+                                >
+                                  #{t}
+                                </span>
+                              ))}
+                            </div>
                           </div>
 
-                          <div className="flex justify-between items-center text-[9px] font-mono text-slate-500">
-                            <span>{post.time}</span>
-                            <span className="text-cyan-400 uppercase font-black tracking-widest">{post.count} Reports Link</span>
+                          <div className="flex justify-between items-center text-[9px] font-mono text-slate-500 pt-2 border-t border-slate-900/80">
+                            <span>{activePost.time}</span>
+                            <span className="text-cyan-400 uppercase font-black tracking-widest">{activePost.count} Reports Link</span>
                           </div>
                         </div>
-                      );
-                    })()}
+                      ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3.5 border border-dashed border-slate-800/80 rounded-xl bg-slate-950/50 animate-fadeIn min-h-[220px]">
+                          <span className="text-xl">🔍</span>
+                          <div className="space-y-1">
+                            <span className="text-xs font-bold text-slate-300 font-sans block">Zero Matches Found</span>
+                            <p className="text-[10px] text-slate-550 max-w-[190px]">No stream logs associated with your input coordinates or hashtags tags.</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFloodTagsQuery("");
+                              setSelectedFloodTag("all");
+                              setSelectedPostId(1);
+                            }}
+                            className="bg-cyan-950 border border-cyan-900/50 hover:bg-cyan-900 text-cyan-400 font-bold px-3 py-1.5 rounded-lg text-[9.5px] font-mono uppercase tracking-wider cursor-pointer transitionActive"
+                          >
+                            Clear Filters
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {/* WORKSPACE 6: QUAKEMAP ACTION GRID */}
             {activeWorkspace === "quake_map" && (
@@ -1489,12 +1621,12 @@ export default function IntegratedWorkspaces() {
                       <svg className="absolute inset-0 w-full h-full p-6" viewBox="0 0 200 120">
                         {/* Interactive Dynamic Tectonic & Seismic Zone Vectors */}
                         {[
-                          { category: "Relief Needs", d: "M 10,65 Q 40,50 78,52", stroke: "#3b82f6", label: "Western Rift Zone" },
-                          { category: "URGENT HELP NEEDED", d: "M 75,42 Q 105,32 140,43", stroke: "#f43f5e", label: "Main Central Rupture Fault", pulse: true },
-                          { category: "Earthquake Damage", d: "M 95,62 L 115,62 L 125,70", stroke: "#eab308", label: "Katmandu Basin Fracture" },
-                          { category: "Relief Distributed", d: "M 130,85 L 165,92", stroke: "#10b981", label: "Southern Buffer Valley" },
-                          { category: "Testing First Task Name", d: "M 25,32 L 85,26", stroke: "#a855f7", label: "Mustang Baseline Sensor Arc" },
-                          { category: "Unknown status", d: "M 155,75 L 185,72", stroke: "#94a3b8", label: "Eastern Anomalous Shear Zone" }
+                          { category: "Relief Needs", d: "M 10,65 Q 25,55 40,65 T 78,52", stroke: "#3b82f6", label: "Western Rift Zone" },
+                          { category: "URGENT HELP NEEDED", d: "M 75,42 Q 90,32 105,42 T 140,43", stroke: "#f43f5e", label: "Main Central Rupture Fault", pulse: true },
+                          { category: "Earthquake Damage", d: "M 95,62 Q 105,55 115,62 T 125,70", stroke: "#eab308", label: "Katmandu Basin Fracture" },
+                          { category: "Relief Distributed", d: "M 130,85 Q 145,75 165,92", stroke: "#10b981", label: "Southern Buffer Valley" },
+                          { category: "Testing First Task Name", d: "M 25,32 Q 55,20 85,26", stroke: "#a855f7", label: "Mustang Baseline Sensor Arc" },
+                          { category: "Unknown status", d: "M 155,75 Q 170,68 185,72", stroke: "#94a3b8", label: "Eastern Anomalous Shear Zone" }
                         ].map((zone) => {
                           const isActive = quakemapFilters.includes(zone.category);
                           return (
@@ -1518,6 +1650,22 @@ export default function IntegratedWorkspaces() {
                                 strokeDasharray={isActive ? "none" : "2,3"}
                                 className="transition-all duration-300" 
                               />
+                                                      
+                              {/* Path Label */}
+                              {isActive && (
+                                <text 
+                                  fill={zone.stroke} 
+                                  fontSize="5" 
+                                  fontWeight="bold" 
+                                  className="pointer-events-none select-none uppercase tracking-tighter"
+                                  textAnchor="middle"
+                                >
+                                  <textPath href={`#path-${zone.category.replace(/\s+/g, '-')}`} startOffset="50%">
+                                    {zone.label}
+                                  </textPath>
+                                </text>
+                              )}
+                              <path id={`path-${zone.category.replace(/\s+/g, '-')}`} d={zone.d} fill="none" stroke="none" />
                             </g>
                           );
                         })}

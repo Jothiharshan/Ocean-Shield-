@@ -217,10 +217,17 @@ export default function ReportingForm({
     // Client-side simulated translation fallback
     setTimeout(() => {
       const translationsMap: Record<string, string> = {
-        Spanish: "[TRADUCCIÓN AL ESPAÑOL]: " + description + " (Advertencia de peligro marítimo confirmada en Manila Bay).",
-        Tagalog: "[TAGALOG TRANSLATION]: " + description + " (Babala: Aktibong sakuna sa baybayin ng look ng Maynila - mag-ingat).",
-        Japanese: "[日本語翻訳]: " + description + " (マニラ湾付近での深刻な海洋危険警告。航行警報が有効です。)",
-      };
+          Spanish: "[TRADUCCIÓN AL ESPAÑOL]: " + description + " (Advertencia de peligro marítimo confirmada en Manila Bay).",
+          Tagalog: "[TAGALOG TRANSLATION]: " + description + " (Babala: Aktibong sakuna sa baybayin ng look ng Maynila - mag-ingat).",
+          Japanese: "[日本語翻訳]: " + description + " (マニラ湾付近での深刻な海洋危険警告。航行警報が有効です。)",
+          Vietnamese: "[BẢN DỊCH TIẾNG VIỆT]: " + description + " (Cảnh báo: Sự cố hàng hải đang hoạt động tại Vịnh Manila - hãy cẩn thận).",
+          Hindi: "[हिंदी अनुवाद]: " + description + " (चेतावनी: मनीला खाड़ी में सक्रिय समुद्री खतरा - सावधान रहें।)",
+          French: "[TRADUCTION FRANÇAISE]: " + description + " (Avertissement : incident maritime actif dans la baie de Manille - soyez prudent).",
+          Mandarin: "[中文翻译]: " + description + " (警告：马尼拉湾发生海上紧急事件 - 请小心。)",
+          Arabic: "[الترجمة العربية]: " + description + " (تحذير: حادث بحري نشط في خليج مانيلا - توخ الحذر).",
+          Indonesian: "[TERJEMAHAN BAHASA INDONESIA]: " + description + " (Peringatan: Insiden laut aktif di Teluk Manila - mohon berhati-hati).",
+          Russian: "[ПЕРЕВОД НА РУССКИЙ]: " + description + " (Предупреждение: активный морской инцидент в заливе Манилы - будьте осторожны).",
+        };
       setDescription(translationsMap[selectedLang] || `[${selectedLang.toUpperCase()} TRANSLATION]: ` + description);
       setIsTranslating(false);
     }, 800);
@@ -343,11 +350,13 @@ export default function ReportingForm({
       rec.onstart = () => {
         setIsRealListening(true);
         setSpeechError(null);
+        console.log("Microphone activated for speech recognition.");
       };
 
       rec.onresult = (event: any) => {
         const currentResultIndex = event.resultIndex;
         const transcript = event.results[currentResultIndex][0].transcript;
+        console.log("Speech recognized:", transcript);
         if (transcript) {
           setDescription((prev) => {
             const separator = prev ? " " : "";
@@ -357,19 +366,20 @@ export default function ReportingForm({
       };
 
       rec.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error);
+        console.error("Speech recognition error details:", event.error);
         if (event.error === "not-allowed") {
-          setSpeechError("Microphone access denied. Please allow microphone permissions.");
+          setSpeechError("Microphone access denied. Please check your browser settings and allow microphone access.");
           isListeningActiveRef.current = false;
         } else if (event.error === "no-speech") {
           // ignore - we will auto-resume in onend
         } else {
-          setSpeechError(`Error: ${event.error}`);
+          setSpeechError(`Speech recognition error: ${event.error}. Ensure you are in a quiet environment.`);
           isListeningActiveRef.current = false;
         }
       };
 
       rec.onend = () => {
+        console.log("Speech recognition session ended.");
         if (isListeningActiveRef.current) {
           // Auto-restart detection upon silence timeout to sustain live input
           try {
@@ -706,6 +716,12 @@ export default function ReportingForm({
                   <option value="Japanese">Japanese</option>
                   <option value="Vietnamese">Vietnamese</option>
                   <option value="Tagalog">Tagalog</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="French">French</option>
+                  <option value="Mandarin">Mandarin</option>
+                  <option value="Arabic">Arabic</option>
+                  <option value="Indonesian">Indonesian</option>
+                  <option value="Russian">Russian</option>
                 </select>
                 <button
                   type="button"
