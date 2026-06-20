@@ -1802,7 +1802,7 @@ export default function IntegratedWorkspaces() {
                           <svg className="w-56 h-56 shrink-0 object-contain text-slate-400" viewBox="0 0 240 270" fill="none">
                             {/* India Outline Silhouette */}
                             <path 
-                              d="M 110,20 L 125,18 L 132,28 L 122,38 L 126,50 L 140,48 L 150,53 L 160,50 L 165,60 L 175,60 L 180,55 L 188,68 L 182,75 L 195,74 L 202,85 L 190,90 L 180,88 L 178,95 L 168,95 L 165,102 L 155,102 L 148,110 L 142,120 L 136,130 L 124,148 L 118,168 L 115,185 L 110,210 L 108,223 L 104,235 L 101,245 L 98,240 L 94,220 L 90,205 L 88,193 L 84,180 L 78,168 L 72,156 L 68,141 L 75,134 L 65,128 L 68,118 L 58,115 L 48,118 L 40,114 L 48,100 L 60,100 L 68,93 L 82,88 L 85,78 L 95,70 L 102,63 L 100,45 Z" 
+                              d="M 115,14 C 110,14 112,6 117,6 C 122,6 123,12 127,12 L 129,20 L 138,20 L 138,26 L 130,36 L 131,48 L 140,48 L 152,53 L 163,50 L 168,57 L 171,51 L 176,51 L 177,57 L 183,57 L 193,54 L 202,51 L 210,58 L 213,70 L 216,81 C 218,88 213,91 210,95 Q 206,106 197,105 L 193,95 C 188,96 182,97 178,95 L 175,98 L 168,96 C 163,101 158,103 155,103 Q 146,112 138,131 Q 128,151 119,171 Q 114,192 110,214 L 105,241 Q 102,246 100,241 C 97,235 95,221 91,203 Q 84,180 77,165 L 75,158 C 72,143 67,130 67,128 C 67,124 64,124 62,124 Q 54,120 48,114 Q 45,108 52,108 L 47,100 L 59,101 Q 67,95 79,90 C 85,82 85,73 95,70 Q 101,61 100,45 Z" 
                               fill="#1e293b" 
                               stroke="#0284c7" 
                               strokeWidth="1.2" 
@@ -2425,7 +2425,7 @@ export default function IntegratedWorkspaces() {
 
                                 {/* Abstract India landform in satellite format */}
                                 <path 
-                                  d="M 90,30 L 100,28 L 106,36 L 98,44 L 100,52 L 120,50 L 128,54 L 135,52 L 138,58 L 150,65 L 140,75 L 144,80 L 155,79 L 160,88 L 150,92 L 142,90 L 140,95 L 132,95 L 130,100 L 122,100 L 118,107 L 113,115 L 108,123 L 98,138 L 94,154 L 92,168 L 88,188 L 86,198 L 83,212 L 81,220 L 78,216 L 75,200 L 72,188 L 70,178 L 67,168 L 62,158 L 57,148 L 54,136 L 60,131 L 52,126 L 54,118 L 46,116 L 38,118 L 32,115 L 38,104 L 48,104" 
+                                  d="M 98,11 C 94,11 95,5 99,5 C 103,5 104,10 107,10 L 108,15 L 115,15 L 115,20 L 109,28 L 110,37 L 117,37 L 126,41 L 134,38 L 138,44 L 141,39 L 144,39 L 145,44 L 150,44 L 157,41 L 164,39 L 170,44 L 173,54 L 175,62 C 177,67 173,70 171,73 Q 168,81 161,80 L 158,73 C 154,74 149,74 146,73 L 144,75 L 138,73 C 134,77 131,79 128,79 Q 121,86 115,100 Q 108,115 101,131 Q 97,147 94,164 L 90,184 Q 88,188 86,184 C 84,180 82,169 79,155 Q 74,138 68,126 L 67,121 C 65,110 61,100 61,98 C 61,95 58,95 57,95 Q 51,92 46,87 Q 44,83 49,83 L 45,77 L 55,77 Q 61,73 70,69 C 75,63 75,56 82,54 Q 87,47 86,35 Z" 
                                   fill="#18181b" 
                                   stroke="#27272a" 
                                   strokeWidth="1" 
@@ -2579,7 +2579,7 @@ export default function IntegratedWorkspaces() {
 
                                 {/* India Outline reference line over Doppler */}
                                 <path 
-                                  d="M 90,30 L 100,28 L 106,36 L 98,44 L 100,52 L 120,50 L 128,54 L 135,52 L 138,58 L 150,65 L 140,75 L 144,80 L 155,79 L 160,88 L 150,92 L 142,90 L 140,95 L 132,95 L 130,100 L 122,100 L 118,107 L 113,115 L 108,123 L 98,138 L 94,154 L 92,168 L 88,188 L 86,198 L 83,212 L 81,220 L 78,216 L 75,200 L 72,188 L 70,178 L 67,168 L 62,158 L 57,148 L 54,136 L 60,131 L 52,126 L 54,118 L 46,116 L 38,118 L 32,115 L 38,104 L 48,104" 
+                                  d="M 98,11 C 94,11 95,5 99,5 C 103,5 104,10 107,10 L 108,15 L 115,15 L 115,20 L 109,28 L 110,37 L 117,37 L 126,41 L 134,38 L 138,44 L 141,39 L 144,39 L 145,44 L 150,44 L 157,41 L 164,39 L 170,44 L 173,54 L 175,62 C 177,67 173,70 171,73 Q 168,81 161,80 L 158,73 C 154,74 149,74 146,73 L 144,75 L 138,73 C 134,77 131,79 128,79 Q 121,86 115,100 Q 108,115 101,131 Q 97,147 94,164 L 90,184 Q 88,188 86,184 C 84,180 82,169 79,155 Q 74,138 68,126 L 67,121 C 65,110 61,100 61,98 C 61,95 58,95 57,95 Q 51,92 46,87 Q 44,83 49,83 L 45,77 L 55,77 Q 61,73 70,69 C 75,63 75,56 82,54 Q 87,47 86,35 Z" 
                                   fill="none" 
                                   stroke="rgba(255,255,255,0.15)" 
                                   strokeWidth="0.8" 
@@ -2720,7 +2720,7 @@ export default function IntegratedWorkspaces() {
                                 <line x1="150" y1="0" x2="150" y2="200" stroke="rgba(239, 68, 68, 0.05)" strokeDasharray="1,1" />
 
                                 <path 
-                                  d="M 90,30 L 100,28 L 106,36 L 98,44 L 100,52 L 120,50 L 128,54 L 135,52 L 138,58 L 150,65 L 140,75 L 144,80 L 155,79 L 160,88 L 150,92 L 142,90 L 140,95 L 132,95 L 130,100 L 122,100 L 118,107 L 113,115 L 108,123 L 98,138 L 94,154 L 92,168 L 88,188 L 86,198 L 83,212 L 81,220 L 78,216 L 75,200 L 72,188 L 70,178 L 67,168 L 62,158 L 57,148 L 54,136 L 60,131 L 52,126 L 54,118 L 46,116 L 38,118 L 32,115 L 38,104 L 48,104" 
+                                  d="M 98,11 C 94,11 95,5 99,5 C 103,5 104,10 107,10 L 108,15 L 115,15 L 115,20 L 109,28 L 110,37 L 117,37 L 126,41 L 134,38 L 138,44 L 141,39 L 144,39 L 145,44 L 150,44 L 157,41 L 164,39 L 170,44 L 173,54 L 175,62 C 177,67 173,70 171,73 Q 168,81 161,80 L 158,73 C 154,74 149,74 146,73 L 144,75 L 138,73 C 134,77 131,79 128,79 Q 121,86 115,100 Q 108,115 101,131 Q 97,147 94,164 L 90,184 Q 88,188 86,184 C 84,180 82,169 79,155 Q 74,138 68,126 L 67,121 C 65,110 61,100 61,98 C 61,95 58,95 57,95 Q 51,92 46,87 Q 44,83 49,83 L 45,77 L 55,77 Q 61,73 70,69 C 75,63 75,56 82,54 Q 87,47 86,35 Z" 
                                   fill="#111827" 
                                   stroke="#374151" 
                                   strokeWidth="1.2" 
@@ -2985,13 +2985,13 @@ export default function IntegratedWorkspaces() {
               <div className="space-y-6 text-left animate-fadeIn">
                 
                 {/* Decision support multi-layer map */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                   
                   {/* Map overlay view (8 cols) */}
-                  <div className="md:col-span-8 bg-slate-950 p-4.5 rounded-xl border border-slate-850 space-y-4">
+                  <div className="lg:col-span-8 bg-slate-950 p-4.5 rounded-xl border border-slate-850 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10.5px] font-mono font-black text-slate-500 uppercase tracking-widest">Decision Support System - GIS Spatial Cockpit</span>
-                      <span className="text-[9.5px] font-mono text-cyan-400 font-bold bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-800/10">APSDMA | Real-time Sighting</span>
+                      <span className="text-[10.5px] font-mono font-black text-slate-400 uppercase tracking-widest">Decision Support System - GIS Spatial Cockpit</span>
+                      <span className="text-[9.5px] font-mono text-cyan-400 font-bold bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-800/10 whitespace-nowrap">APSDMA | Real-time Sighting</span>
                     </div>
 
                     <div className="h-72 bg-[#050e21] rounded-xl border border-slate-850 relative overflow-hidden flex items-center justify-center">
@@ -3045,10 +3045,10 @@ export default function IntegratedWorkspaces() {
                   </div>
 
                   {/* Right interactive layer switches (4 cols) */}
-                  <div className="md:col-span-4 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
+                  <div className="lg:col-span-4 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
                     <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest block">Interactive Layers Toggle</span>
                     
-                    <div className="space-y-2 text-[10.5px] font-mono">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 text-[10.5px] font-mono">
                       {["Rainfall", "Reservoirs", "Cyclone Track", "Flood Zones", "Lightning"].map((lay) => {
                         const isAdded = activeDssLayers.includes(lay);
                         return (
@@ -3061,14 +3061,14 @@ export default function IntegratedWorkspaces() {
                                 setActiveDssLayers([...activeDssLayers, lay]);
                               }
                             }}
-                            className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer select-none transition ${
+                            className={`flex items-center justify-between gap-3 p-2 rounded-lg border cursor-pointer select-none transition ${
                               isAdded 
                                 ? "bg-cyan-950/40 border-cyan-500/50 text-cyan-400 font-extrabold" 
                                 : "bg-slate-900 border-slate-850 text-slate-500 hover:text-slate-350"
                             }`}
                           >
-                            <span>{lay}</span>
-                            <span className="text-[9px]">{isAdded ? "ACTIVE LIVE" : "MUTED"}</span>
+                            <span className="truncate pr-1">{lay}</span>
+                            <span className="text-[8.5px] sm:text-[9px] font-bold tracking-tight whitespace-nowrap shrink-0 text-right">{isAdded ? "ACTIVE LIVE" : "MUTED"}</span>
                           </div>
                         );
                       })}
@@ -3085,10 +3085,10 @@ export default function IntegratedWorkspaces() {
               <div className="space-y-6 text-left animate-fadeIn">
                 
                 {/* Fleet toggle and fuel visualizer split */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                   
                   {/* High fidelity charts fuel curves (7 cols) */}
-                  <div className="md:col-span-7 bg-slate-950 p-4.5 rounded-xl border border-slate-850 space-y-4">
+                  <div className="lg:col-span-7 bg-slate-950 p-4.5 rounded-xl border border-slate-850 space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-wide">YACHT FUEL CONSUMPTION CURVES (K/Gallons)</span>
                       
@@ -3165,7 +3165,7 @@ export default function IntegratedWorkspaces() {
                   </div>
 
                   {/* Mechanic alerts checklist list (5 cols) */}
-                  <div className="md:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
+                  <div className="lg:col-span-5 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
                     <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest block">Core Yacht Mechanic Dispatches</span>
                     
                     <div className="space-y-3 font-mono text-[10.5px]">
