@@ -1,6 +1,6 @@
 {
   "name": "OceanShield AI",
   "description": "Integrated web platform for crowdsourced ocean hazard warning, incident dispatch tracking, and social media analytics.",
-  "requestFramePermissions": ["microphone"],
+  "requestFramePermissions": ["microphone", "geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

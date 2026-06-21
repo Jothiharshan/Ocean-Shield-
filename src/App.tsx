@@ -54,14 +54,187 @@ import {
   Cpu,
   X,
   Trash,
-  Check
+  Check,
+  CloudSun,
+  CloudRain,
+  CloudLightning,
+  Waves,
+  Wind,
+  Thermometer,
+  Gauge
 } from "lucide-react";
+
+const WEATHER_DATA = {
+  Manila: {
+    name: "Manila Bay Sector",
+    temp: "31°C",
+    wind: "14 kts NE",
+    waves: "1.2m Swell",
+    humidity: "82% RH",
+    barometer: "1011 hPa",
+    condition: "Partly Cloudy",
+    warning: "None - Green operations status",
+    icon: "CloudSun",
+    climate: "Tropical Marine Climate"
+  },
+  Kerpen: {
+    name: "Kerpen River Basin",
+    temp: "18°C",
+    wind: "28 kts SW",
+    waves: "3.2m River Swell",
+    humidity: "95% RH",
+    barometer: "998 hPa",
+    condition: "Heavy Rain & Torrent",
+    warning: "🚩 SEVERE FLASH FLOOD & OVERFLOW ALERT",
+    icon: "CloudRain",
+    climate: "Inland Sub-humid Storm"
+  },
+  Euskirchen: {
+    name: "Euskirchen Dam Sector",
+    temp: "16°C",
+    wind: "22 kts W",
+    waves: "2.5m Reserv. Rise",
+    humidity: "89% RH",
+    barometer: "1002 hPa",
+    condition: "Moderate Thunderstorms",
+    warning: "⚠️ DAM OVERFLOW & HIGH DISCHARGE LEVEL",
+    icon: "CloudLightning",
+    climate: "Alpine Watershed Region"
+  },
+  Reef: {
+    name: "Verde Island Reef Flats",
+    temp: "29°C",
+    wind: "8 kts E",
+    waves: "0.5m Ripples",
+    humidity: "75% RH",
+    barometer: "1013 hPa",
+    condition: "Optimal Clear Skies",
+    warning: "None - Perfect research window",
+    icon: "Sun",
+    climate: "Equatorial Coastal Shallows"
+  }
+};
+
+const get30DayForecast = (location: "Manila" | "Kerpen" | "Euskirchen" | "Reef") => {
+  const baseIcons = {
+    Manila: ["CloudSun", "CloudSun", "CloudLightning", "CloudSun", "Sun", "CloudRain", "CloudLightning"],
+    Kerpen: ["CloudRain", "CloudLightning", "CloudRain", "CloudSun", "CloudRain", "CloudRain", "CloudSun"],
+    Euskirchen: ["CloudLightning", "CloudRain", "CloudSun", "CloudSun", "CloudLightning", "CloudRain", "CloudSun"],
+    Reef: ["Sun", "Sun", "CloudSun", "Sun", "Sun", "CloudSun", "Sun"]
+  };
+  const baseTemps = {
+    Manila: { low: 26, high: 32 },
+    Kerpen: { low: 11, high: 19 },
+    Euskirchen: { low: 12, high: 18 },
+    Reef: { low: 25, high: 30 }
+  };
+  const conditions = {
+    Manila: ["Partly Cloudy", "Tropical Rain", "Thunderstorm", "Scattered Showers", "Sunny & Humid"],
+    Kerpen: ["Heavy Overcast", "Basin Rainfall", "Severe Thunderstorm", "Intermittent Drizzle", "Cloudy Clears"],
+    Euskirchen: ["Alpine Fog", "Reservoir Torrent", "Lightning Storm", "Mild Winds", "Overcast Skies"],
+    Reef: ["Crisp Sea Breeze", "Clear Ocean Skies", "Gentle Ripples", "Sunny Coral Window", "Placid Shallow Calm"]
+  };
+
+  return Array.from({ length: 30 }, (_, index) => {
+    const dayNum = index + 1;
+    const seed = (dayNum * 17) % 5;
+    const iconSeed = (dayNum * 23) % baseIcons[location].length;
+    const icon = baseIcons[location][iconSeed];
+    
+    const tempVar = (dayNum % 3) - 1;
+    const high = baseTemps[location].high + tempVar;
+    const low = baseTemps[location].low + (dayNum % 2 ? -1 : 1);
+    
+    const morningWind = Math.round((dayNum * 7) % 15 + 5);
+    const nightWind = Math.round((dayNum * 11) % 12 + 4);
+
+    return {
+      day: dayNum,
+      dateText: `Jun ${dayNum}, 2026`,
+      icon,
+      high: `${high}°C`,
+      low: `${low}°C`,
+      condition: conditions[location][seed],
+      humidity: `${70 + (dayNum % 15) * 2}%`,
+      morningWind: `${morningWind} kts`,
+      nightWind: `${nightWind} kts`,
+      hourlyForecast: [
+        { time: "00:00", temp: `${low}°C`, desc: "Cool Breeze", wind: `${nightWind} kts` },
+        { time: "06:00", temp: `${low + 2}°C`, desc: "Early Light", wind: `${Math.round((morningWind + nightWind)/2)} kts` },
+        { time: "12:00", temp: `${high}°C`, desc: conditions[location][seed], wind: `${morningWind} kts` },
+        { time: "18:00", temp: `${high - 2}°C`, desc: "Sunset Transition", wind: `${Math.round(morningWind * 0.8)} kts` }
+      ]
+    };
+  });
+};
 
 export default function App() {
   // Mobile responsive sidebar open/close state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Session Authentication status (Defaults to Jothi Harshan D K to show high-fidelity Landing/Authorize portal)
+  // Weather check variables
+  const [selectedWeatherLocation, setSelectedWeatherLocation] = useState<"Manila" | "Kerpen" | "Euskirchen" | "Reef">("Manila");
+  const [isWeatherDropdownOpen, setIsWeatherDropdownOpen] = useState(false);
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<number>(20); // Defaults to June 20th
+
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationDetectionStatus, setLocationDetectionStatus] = useState<string | null>(null);
+
+  const detectUserLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationDetectionStatus("Unsupported");
+      return;
+    }
+    setIsDetectingLocation(true);
+    setLocationDetectionStatus("Acquiring GPS...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const locCoords = {
+          Manila: { lat: 14.5995, lng: 120.9842 },
+          Reef: { lat: 13.5264, lng: 121.0664 },
+          Kerpen: { lat: 50.8716, lng: 6.6961 },
+          Euskirchen: { lat: 50.6599, lng: 6.7931 }
+        };
+        
+        let nearestKey: "Manila" | "Reef" | "Kerpen" | "Euskirchen" = "Manila";
+        let minDist = Infinity;
+        
+        Object.entries(locCoords).forEach(([key, coords]) => {
+          const d = Math.pow(latitude - coords.lat, 2) + Math.pow(longitude - coords.lng, 2);
+          if (d < minDist) {
+            minDist = d;
+            nearestKey = key as any;
+          }
+        });
+        
+        setSelectedWeatherLocation(nearestKey);
+        setIsDetectingLocation(false);
+        setLocationDetectionStatus(`Found: ${(nearestKey as string) === "Reef" ? "Verde Island" : nearestKey}`);
+        
+        setTimeout(() => setLocationDetectionStatus(null), 4000);
+      },
+      (error) => {
+        console.warn("Geolocation failure:", error);
+        setIsDetectingLocation(false);
+        if (error.code === 1) {
+          setLocationDetectionStatus("GPS Denied");
+        } else {
+          setLocationDetectionStatus("GPS Timeout");
+        }
+        setTimeout(() => setLocationDetectionStatus(null), 4000);
+      },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: Infinity }
+    );
+  };
+
+  useEffect(() => {
+    detectUserLocation();
+  }, []);
+
+
+  // Session Authentication status (Defaults to null to force high-fidelity login and sign up gate upon entrance)
   const [sessionUser, setSessionUser] = useState<User | null>(() => {
     const cachedUser = localStorage.getItem("oceanshield_session_user");
     if (cachedUser) {
@@ -71,14 +244,7 @@ export default function App() {
         // Fallback
       }
     }
-    const defaultUser: User = {
-      id: "usr-guest-2026",
-      name: "Jothi Harshan D K",
-      email: "jothi@oceanshield.org",
-      role: "Citizen",
-      organization: "Coastal Safeguard Guild"
-    };
-    return defaultUser;
+    return null;
   });
 
   // Active theme color mode (Ocean dark or Sunlight light)
@@ -430,6 +596,18 @@ export default function App() {
   // Selected report details helper for dashboard map interaction
   const activeSelectedReport = reports.find(r => r.id === selectedReportId);
 
+  // If the user is not authenticated, show the secure Split-Panel login/signup gate first
+  if (!sessionUser) {
+    return (
+      <AuthScreen
+        onLogin={(user) => {
+          handleLogin(user);
+          setActiveTab("dashboard");
+        }}
+      />
+    );
+  }
+
   return (
     <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950 ${theme === "light" ? "light-theme" : ""}`}>
       
@@ -440,7 +618,7 @@ export default function App() {
             {alerts.slice(0, 3).map((a) => (
               <span key={a.id} className="inline-flex items-center gap-2 mr-10">
                 <AlertTriangle className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                <strong className="text-orange-400">[SEVERE RADIAL ALERT]</strong> {a.title} ({a.affectedCoordinates.radiusKm}km protection zone active). Issued by {a.verifiedBy}.
+                <strong className="text-orange-400">[Severe Incident Alert]</strong> {a.title} ({a.affectedCoordinates.radiusKm}km protection zone active). Verified by {a.verifiedBy}.
               </span>
             ))}
           </div>
@@ -459,14 +637,14 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-1.5 font-heading">
-                <span className="text-lg font-black tracking-wider text-slate-100 uppercase">
+                <span className="text-lg font-bold tracking-tight text-slate-100">
                   OceanShield
                 </span>
-                <span className="text-[9px] font-bold font-mono text-cyan-400 bg-cyan-950/60 px-1.5 py-0.2 rounded border border-cyan-800/10 shrink-0">
-                  AI + CORE
+                <span className="text-[10px] font-semibold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/10 shrink-0 uppercase tracking-wider">
+                  AI Core
                 </span>
               </div>
-              <p className="text-[11px] text-slate-450 font-semibold hidden sm:block">NASA-vibe Ocean Hazard & Sighting Dispatch Monitor</p>
+              <p className="text-xs text-slate-400 hidden sm:block">Professional Ocean Safety, Weather & Incident Dispatch Platform</p>
             </div>
           </div>
 
@@ -483,6 +661,18 @@ export default function App() {
               >
                 <Home className={`w-4 h-4 shrink-0 transition ${activeTab === "landing" ? "text-cyan-500" : "text-slate-400 dark:text-slate-500"}`} />
                 <span>Landing</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("auth")}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition select-none ${
+                  activeTab === "auth"
+                    ? "bg-white dark:bg-slate-900 text-cyan-500 dark:text-cyan-400 shadow-sm border border-slate-200/80 dark:border-slate-800 scale-103"
+                    : "text-slate-650 dark:text-slate-400 hover:text-cyan-500 dark:hover:text-cyan-400"
+                }`}
+              >
+                <UserCheck className={`w-4 h-4 shrink-0 transition ${activeTab === "auth" ? "text-cyan-500" : "text-slate-400 dark:text-slate-500"}`} />
+                <span>Login / Logout</span>
               </button>
 
               {getNavItems().map((item) => {
@@ -512,6 +702,326 @@ export default function App() {
           {/* Theme, Demo Clearance & Auth Status Area */}
           <div className="flex items-center gap-2 sm:gap-2.5 ml-auto lg:ml-0 flex-wrap shrink-0">
             
+            {/* INTERACTIVE WEATHER & CLIMATE SCANS WIDGET */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsWeatherDropdownOpen(!isWeatherDropdownOpen)}
+                className="flex items-center gap-1.5 sm:gap-2 bg-slate-950 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-slate-850 h-9 sm:h-10 hover:border-cyan-500/50 transition cursor-pointer select-none shrink-0"
+                title="View climate monitoring station details"
+              >
+                {selectedWeatherLocation === "Manila" && <CloudSun className="w-4 h-4 text-cyan-400 animate-pulse" />}
+                {selectedWeatherLocation === "Kerpen" && <CloudRain className="w-4 h-4 text-sky-400" />}
+                {selectedWeatherLocation === "Euskirchen" && <CloudLightning className="w-4 h-4 text-amber-400" />}
+                {selectedWeatherLocation === "Reef" && <Sun className="w-4 h-4 text-amber-500 animate-spin" style={{ animationDuration: "12s" }} />}
+                
+                <div className="text-left font-mono leading-none">
+                  <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">MET-OCEAN SCAN</div>
+                  <div className="text-[10px] font-bold text-cyan-400 flex items-center gap-1">
+                    <span>{WEATHER_DATA[selectedWeatherLocation].temp}</span>
+                    <span className="text-[8px] text-slate-400 hidden xs:inline">({selectedWeatherLocation})</span>
+                  </div>
+                </div>
+              </button>
+
+              {isWeatherDropdownOpen && (
+                <>
+                  {/* Backdrop overlay to close when clicking outside */}
+                  <div 
+                    className="fixed inset-0 z-40 bg-transparent"
+                    onClick={() => setIsWeatherDropdownOpen(false)}
+                  />
+                  <div className={`absolute right-0 mt-2 ${isCalendarExpanded ? "w-80 md:w-[48rem]" : "w-[19rem]"} bg-slate-950/98 backdrop-blur-md border border-cyan-500/35 p-4 rounded-xl shadow-2xl z-50 animate-fadeIn transition-all duration-300 space-y-3`}>
+                    <div className="flex items-center justify-between border-b border-slate-850 pb-2">
+                      <div className="flex items-center gap-1.5">
+                        <Waves className="w-4 h-4 text-cyan-400" />
+                        <span className="text-[11px] font-bold text-slate-100 tracking-wide uppercase">WEATHER MONITOR STATION</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isCalendarExpanded && (
+                          <span className="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-500/20 animate-pulse">
+                            Interactive Active Range
+                          </span>
+                        )}
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                      </div>
+                    </div>
+
+                    <div className={`flex flex-col ${isCalendarExpanded ? "md:flex-row" : "space-y-3"} gap-4`}>
+                      
+                      {/* LEFT COLUMN: ACTIVE DATA / HOUR PROJECTIONS OR FORM */}
+                      <div className="flex-1 space-y-3">
+                        {/* Regional Dropdown selector */}
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-mono font-bold tracking-widest text-slate-500 uppercase block">SELECT REGION:</label>
+                          <div className="flex gap-1 flex-wrap items-center">
+                            {(["Manila", "Kerpen", "Euskirchen", "Reef"] as const).map((loc) => {
+                              const isSel = selectedWeatherLocation === loc;
+                              return (
+                                <button
+                                  key={loc}
+                                  type="button"
+                                  onClick={() => setSelectedWeatherLocation(loc)}
+                                  className={`px-2 py-1 text-[9px] font-mono rounded cursor-pointer border transition-all ${
+                                    isSel
+                                      ? "bg-cyan-955 dark:bg-cyan-950 border-cyan-500 text-cyan-400 font-bold"
+                                      : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-850"
+                                  }`}
+                                >
+                                  {loc === "Manila" ? "Manila" : loc === "Kerpen" ? "Kerpen" : loc === "Euskirchen" ? "Euskirchen" : "Verde Island"}
+                                </button>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={detectUserLocation}
+                              disabled={isDetectingLocation}
+                              className={`px-2 py-1 text-[9px] font-mono rounded cursor-pointer border transition-all flex items-center gap-1 ${
+                                isDetectingLocation
+                                  ? "bg-slate-900 border-slate-800 text-slate-500 animate-pulse animate-duration-1000"
+                                  : locationDetectionStatus
+                                  ? "bg-emerald-950/40 border-emerald-500 text-emerald-400 font-bold"
+                                  : "bg-cyan-500/10 border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20"
+                              }`}
+                              title="Auto detect region nearest you using browser location"
+                            >
+                              <MapPin className={`w-3 h-3 ${isDetectingLocation ? "animate-spin" : ""}`} />
+                              <span>{locationDetectionStatus || "Auto Detect GPS"}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Interactive Current Day Header */}
+                        {isCalendarExpanded && (
+                          <div className="bg-slate-900/60 p-2 rounded border border-slate-850 flex justify-between items-center text-[10px] font-mono">
+                            <span className="text-slate-400 font-bold">🎯 Forecast Day Selected:</span>
+                            <span className="text-cyan-400 font-extrabold font-mono text-xs">
+                              June {selectedCalendarDay}, 2026
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Active weather metrics grid */}
+                        <div className="grid grid-cols-2 gap-2 bg-slate-900/60 p-2.5 rounded-lg border border-slate-850 font-mono text-[10px]">
+                          <div className="space-y-0.5">
+                            <span className="text-slate-500 text-[8.5px] uppercase">Temperature</span>
+                            <div className="font-bold text-slate-200 flex items-center gap-1">
+                              <Thermometer className="w-3.5 h-3.5 text-rose-400" />
+                              <span>
+                                {isCalendarExpanded 
+                                  ? get30DayForecast(selectedWeatherLocation)[selectedCalendarDay - 1]?.high 
+                                  : WEATHER_DATA[selectedWeatherLocation].temp}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-slate-500 text-[8.5px] uppercase">Wind Vector</span>
+                            <div className="font-bold text-slate-200 flex items-center gap-1">
+                              <Wind className="w-3.5 h-3.5 text-sky-400" />
+                              <span>
+                                {isCalendarExpanded
+                                  ? get30DayForecast(selectedWeatherLocation)[selectedCalendarDay - 1]?.morningWind
+                                  : WEATHER_DATA[selectedWeatherLocation].wind}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="space-y-0.5 pt-1.5 border-t border-slate-850/50">
+                            <span className="text-slate-500 text-[8.5px] uppercase">Wave Swell</span>
+                            <div className="font-bold text-slate-200 flex items-center gap-1">
+                              <Waves className="w-3.5 h-3.5 text-cyan-400" />
+                              <span>{WEATHER_DATA[selectedWeatherLocation].waves}</span>
+                            </div>
+                          </div>
+                          <div className="space-y-0.5 pt-1.5 border-t border-slate-850/50">
+                            <span className="text-slate-500 text-[8.5px] uppercase">Barometer</span>
+                            <div className="font-bold text-slate-200 flex items-center gap-1">
+                              <Gauge className="w-3.5 h-3.5 text-amber-400" />
+                              <span>{WEATHER_DATA[selectedWeatherLocation].barometer}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Meta info boxes */}
+                        <div className="space-y-1.5 text-[9.5px] font-mono pt-1">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Condition:</span>
+                            <span className="text-cyan-400 font-bold">
+                              {isCalendarExpanded
+                                ? get30DayForecast(selectedWeatherLocation)[selectedCalendarDay - 1]?.condition
+                                : WEATHER_DATA[selectedWeatherLocation].condition}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Climate Zone:</span>
+                            <span className="text-slate-300 font-semibold">{WEATHER_DATA[selectedWeatherLocation].climate}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500">Humidity:</span>
+                            <span className="text-slate-300 font-semibold">
+                              {isCalendarExpanded
+                                ? get30DayForecast(selectedWeatherLocation)[selectedCalendarDay - 1]?.humidity
+                                : WEATHER_DATA[selectedWeatherLocation].humidity}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 24/7 Hours Climatic Forecast Breakdown */}
+                        <div className="bg-slate-900/50 border border-slate-850 p-2.5 rounded-lg space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-cyan-400 tracking-wide uppercase">
+                              ⏱️ 24/7 Weather Forecast
+                            </span>
+                            <span className="text-[8px] font-mono text-slate-500 uppercase">Live Estimate</span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-1 flex-wrap">
+                            {(isCalendarExpanded
+                              ? get30DayForecast(selectedWeatherLocation)[selectedCalendarDay - 1]?.hourlyForecast
+                              : [
+                                  { time: "00:00", temp: "26°C", desc: "Stable Marine", wind: "12 kts" },
+                                  { time: "06:00", temp: "28°C", desc: "Light Gusts", wind: "14 kts" },
+                                  { time: "12:00", temp: WEATHER_DATA[selectedWeatherLocation].temp, desc: WEATHER_DATA[selectedWeatherLocation].condition, wind: WEATHER_DATA[selectedWeatherLocation].wind },
+                                  { time: "18:00", temp: "29°C", desc: "Cooled Tide", wind: "10 kts" }
+                                ]
+                            ).map((hr, idx) => (
+                              <div key={idx} className="bg-slate-950 p-1.5 rounded border border-slate-850 text-[9px] text-center font-mono space-y-1">
+                                <div className="text-slate-500 text-[8px] font-bold">{hr.time}</div>
+                                <div className="font-extrabold text-cyan-400">{hr.temp}</div>
+                                <div className="text-slate-300 truncate tracking-tighter text-[7.5px]" title={hr.desc}>
+                                  {hr.desc}
+                                </div>
+                                <div className="text-[7px] text-slate-500">{hr.wind}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Operations clearance warning logic */}
+                        <div className="bg-slate-900/90 border border-slate-850 p-2 rounded-lg text-[9px] font-mono space-y-1 leading-normal">
+                          <span className="text-[9px] font-bold tracking-wide text-slate-400 uppercase block">Weather Safety Clearance</span>
+                          <p className={`font-semibold ${WEATHER_DATA[selectedWeatherLocation].warning.includes("None") ? "text-emerald-400" : "text-amber-400 animate-pulse"}`}>
+                            {WEATHER_DATA[selectedWeatherLocation].warning}
+                          </p>
+                          <p className="text-[8px] text-slate-400 italic pt-1 border-t border-slate-850/40">
+                            {sessionUser?.role === "Fisherman" && WEATHER_DATA[selectedWeatherLocation].temp === "18°C" 
+                              ? "📢 River currents exceeding small deck thresholds. Avoid deployment."
+                              : sessionUser?.role === "Fisherman"
+                              ? "🟢 Safe operational threshold clearance for fishing channels."
+                              : sessionUser?.role === "Citizen"
+                              ? "ℹ️ Coastal storm precautions active nearby. Verify bulletins."
+                              : "🔬 Optimal conditions for micro-debris or sensor sampling."}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* RIGHT COLUMN: INTERACTIVE Calendar (Toggled) */}
+                      {isCalendarExpanded && (
+                        <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-slate-850 pt-3 md:pt-0 md:pl-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                              30-DAY WEATHER CALENDAR
+                            </span>
+                            <span className="text-[8.5px] font-mono text-slate-400 font-semibold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                              June 2026
+                            </span>
+                          </div>
+
+                          {/* Calendar Grid S M T W T F S */}
+                          <div className="space-y-1 font-mono">
+                            <div className="grid grid-cols-7 gap-1 text-center text-[8px] font-bold text-slate-500 uppercase">
+                              <span>Sun</span>
+                              <span>Mon</span>
+                              <span>Tue</span>
+                              <span>Wed</span>
+                              <span>Thu</span>
+                              <span>Fri</span>
+                              <span>Sat</span>
+                            </div>
+                            
+                            <div className="grid grid-cols-7 gap-1">
+                              {/* June 1, 2026 starts on a Monday. Fill Sunday with empty offset block */}
+                              <div className="bg-slate-900/10 min-h-[42px] border border-transparent rounded opacity-25" />
+                              
+                              {get30DayForecast(selectedWeatherLocation).map((dayData) => {
+                                const isSelected = selectedCalendarDay === dayData.day;
+                                const isCurrentDate = dayData.day === 20; // Simulated today's date
+                                
+                                const isSun = dayData.icon === "Sun";
+                                const isRain = dayData.icon === "CloudRain";
+                                const isLight = dayData.icon === "CloudLightning";
+                                
+                                return (
+                                  <button
+                                    key={dayData.day}
+                                    type="button"
+                                    onClick={() => setSelectedCalendarDay(dayData.day)}
+                                    className={`min-h-[42px] p-0.5 rounded border flex flex-col justify-between text-left transition cursor-pointer select-none ${
+                                      isSelected
+                                        ? "bg-cyan-950 border-cyan-400 text-cyan-100 ring-1 ring-cyan-500/30"
+                                        : isCurrentDate
+                                        ? "bg-slate-900 border-yellow-500/50 hover:bg-slate-850"
+                                        : "bg-slate-900/80 border-slate-850 hover:border-slate-700 hover:bg-slate-850 text-slate-300"
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-center w-full leading-none">
+                                      <span className={`text-[9px] font-bold ${isCurrentDate ? "text-yellow-400 underline font-semibold" : "text-slate-400"}`}>
+                                        {dayData.day}
+                                      </span>
+                                      
+                                      {/* Mini condition dot/icon */}
+                                      <span className="text-[8px]">
+                                        {isSun && <span className="text-amber-500 animate-pulse text-[10px]">☀</span>}
+                                        {isRain && <span className="text-sky-400 text-[10px]">💧</span>}
+                                        {isLight && <span className="text-amber-400 text-[10px]">⚡</span>}
+                                        {!isSun && !isRain && !isLight && <span className="text-cyan-400 text-[10px]">⛅</span>}
+                                      </span>
+                                    </div>
+                                    
+                                    <div className="text-[7.5px] font-bold text-slate-400 text-right w-full leading-tight">
+                                      {dayData.high}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 p-2 rounded-lg bg-cyan-955 dark:bg-cyan-950/20 border border-cyan-500/20 text-[9px] font-mono leading-normal">
+                            <span className="text-amber-400 text-xs">💡</span>
+                            <div className="text-slate-350 dark:text-slate-300">
+                              Click any day above to load its <strong>24/7 Hourly Predictor Cycles</strong>, climate models, and relative humidity.
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+
+                    {/* Toggle Button for Calendar View expansion */}
+                    <div className="border-t border-slate-850/80 pt-2 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded-lg text-[10px] font-mono font-bold cursor-pointer transition select-none"
+                      >
+                        <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>{isCalendarExpanded ? "Hide 30-Day Calendar" : "View 30-Day Climate Calendar"}</span>
+                      </button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setIsWeatherDropdownOpen(false)}
+                        className="text-[10px] font-mono text-slate-500 hover:text-slate-300 font-bold transition px-2 py-1 cursor-pointer"
+                      >
+                        Close
+                      </button>
+                    </div>
+
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* PERSISTENT DEMO SYSTEM ROLE SWITCHER */}
             <div className="flex items-center gap-1 sm:gap-1.5 bg-slate-950 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border border-slate-850 h-9 sm:h-10 shrink-0">
               <span className="text-[10px] font-mono font-bold text-slate-500 uppercase hidden md:inline xl:hidden 2xl:inline">Demo Clearance:</span>
@@ -562,8 +1072,8 @@ export default function App() {
             {/* Auth Profile / Login action */}
             {sessionUser ? (
               <div className="flex items-center gap-2 sm:gap-3 bg-slate-955 dark:bg-slate-950 p-1 sm:p-1.5 pr-2.5 sm:pr-3.5 rounded-2xl border border-slate-850 dark:border-slate-850 shadow-sm h-9 sm:h-10 shrink-0">
-                <div className="w-6.5 h-6.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/10 flex items-center justify-center font-bold text-[11px] select-none shrink-0">
-                  JO
+                <div className="w-6.5 h-6.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/10 flex items-center justify-center font-bold text-[10px] select-none shrink-0">
+                  {sessionUser.name ? sessionUser.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "OP" : "OP"}
                 </div>
                 <div className="hidden sm:block text-left select-none leading-none pr-1 max-w-[120px] xl:max-w-[100px] 2xl:max-w-none">
                   <h4 className="text-[11px] font-bold text-slate-100 tracking-wide leading-tight truncate">{sessionUser.name}</h4>
@@ -579,7 +1089,7 @@ export default function App() {
               </div>
             ) : (
               <button
-                onClick={() => handleGuestAutoLogin("dashboard")}
+                onClick={() => setActiveTab("auth")}
                 className="bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition shadow-md cursor-pointer font-heading shrink-0"
               >
                 Operator Login
@@ -606,7 +1116,7 @@ export default function App() {
                   <span>PREMIUM ARTIFICIAL HYDROGRAPHIC INTEGRATION</span>
                 </div>
                 
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-heading tracking-tight leading-none text-slate-100">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading tracking-tight leading-none text-slate-100">
                   Monitor Ocean Hazards <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">
                     with AI + Citizens
@@ -614,7 +1124,7 @@ export default function App() {
                 </h1>
 
                 <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl">
-                  OceanShield is a high-performance crowdsourced surveillance system interfacing deep ocean social analytics with live satellite geospatial overlays. Report anomalies, sketch tactical plumes, and synchronize direct incidents in real-time.
+                  OceanShield is a high-performance crowdsourced surveillance system interfacing deep ocean social analytics with live satellite geospatial overlays. Report anomalies, sketch tactical plumes, and security-verify incidents in real-time.
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-2">
@@ -636,6 +1146,14 @@ export default function App() {
                     className="px-6 py-3.5 bg-slate-900 hover:bg-slate-850 active:scale-95 text-cyan-400 font-bold text-xs tracking-wider uppercase rounded-xl border border-cyan-500/20 transition cursor-pointer font-heading"
                   >
                     Explore Dashboard Live
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab("auth")}
+                    className="px-6 py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-95 text-white font-bold text-xs tracking-wider uppercase rounded-xl border border-violet-500/20 transition cursor-pointer font-heading flex items-center gap-2"
+                  >
+                    <Lock className="w-3.5 h-3.5 text-violet-200" />
+                    <span>Access Portal (Login / Logout)</span>
                   </button>
                 </div>
               </div>
@@ -670,8 +1188,8 @@ export default function App() {
                   <span className="absolute top-36 right-36 w-3 h-3 bg-amber-500 border border-slate-900 rounded-full animate-pulse z-20" />
 
                   {/* Compass grid readouts */}
-                  <div className="absolute bottom-4 text-center font-mono text-[9px] text-slate-500 tracking-widest font-black uppercase z-20">
-                    SYS RADAR OVERWATCH SENSING
+                  <div className="absolute bottom-4 text-center font-mono text-[10px] text-slate-400 tracking-wider font-semibold uppercase z-20">
+                    Sensing Active Location
                   </div>
                   
                   <div className="flex flex-col items-center gap-1 z-20">
@@ -688,10 +1206,10 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-850 text-left space-y-2 hover:border-slate-800 transition">
-                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-extrabold block">CROWD DISPATCH RECORDS</span>
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">Incident Sighting Records</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black font-heading text-slate-100">324+</span>
-                    <span className="text-xs text-cyan-400 font-bold font-mono">Telemetry Nodes</span>
+                    <span className="text-3xl font-extrabold font-heading text-slate-100">324+</span>
+                    <span className="text-xs text-cyan-400 font-bold font-mono">Registered Sightings</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Visual anomalies logged securely dynamically spanning shipping lanes and fragile reef zones.
@@ -699,9 +1217,9 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-850 text-left space-y-2 hover:border-slate-800 transition">
-                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-extrabold block">CRITICAL ACTIVE ALERTS</span>
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">Critical Active Alerts</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black font-heading text-orange-400">28</span>
+                    <span className="text-3xl font-extrabold font-heading text-orange-400">28</span>
                     <span className="text-xs text-orange-400 font-bold font-mono">Broadcasting Zones</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
@@ -710,9 +1228,9 @@ export default function App() {
                 </div>
 
                 <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-850 text-left space-y-2 hover:border-slate-800 transition">
-                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-extrabold block">VERIFIED ACCURACY RATING</span>
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">Marine Verification Rate</span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black font-heading text-emerald-400">{verifiedPercentage}%</span>
+                    <span className="text-3xl font-extrabold font-heading text-emerald-400">{verifiedPercentage}%</span>
                     <span className="text-xs text-emerald-400 font-bold font-mono">Expert Verification</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
@@ -726,8 +1244,8 @@ export default function App() {
             {/* HOW IT WORKS PROCESS DIAGRAM FLOW */}
             <div className="bg-slate-900 border border-slate-850 rounded-3xl p-8 text-center space-y-6 relative overflow-hidden" id="how-it-works-diagram">
               <div className="space-y-1.5 max-w-2xl mx-auto">
-                <span className="text-[10px] text-cyan-400 font-mono font-bold tracking-widest uppercase block font-sans">Dynamic Ocean Telemetry Detection Pipeline</span>
-                <h3 className="text-2xl font-black font-heading text-slate-100 uppercase">How OceanShield Works</h3>
+                <span className="text-[10px] text-cyan-400 font-mono font-bold tracking-widest uppercase block font-sans">Active Hazard Detection Pipeline</span>
+                <h3 className="text-2xl font-extrabold font-heading text-slate-100 uppercase">How OceanShield Works</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Our platform integrates citizen reports, AI verification parameters, and live emergency radar dispatches to coordinate quick marine hazard containment.
                 </p>
@@ -871,6 +1389,104 @@ export default function App() {
           </div>
         )}
 
+        {/* =============== T24: LOGIN / LOGOUT AUTHENTICATION PORTAL =============== */}
+        {activeTab === "auth" && (
+          <div className="max-w-4xl mx-auto py-6" id="auth-portal-root">
+            {sessionUser ? (
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl text-left space-y-8 animate-in fade-in duration-300">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-slate-800 pb-6">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] text-cyan-400 font-mono font-bold tracking-widest uppercase block">Active Operator Session</span>
+                    <h2 className="text-2xl font-extrabold text-slate-100 tracking-tight">Credentials Secured</h2>
+                    <p className="text-xs text-slate-400">Your satellite telemetry uplink and dispatch authorization are authenticated.</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 text-red-400 border border-red-500/25 rounded-xl font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 self-start md:self-auto"
+                    title="Disconnect Secure Session"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Disconnect Telemetry (Log Out)</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Operator Metadata Cards */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest">Active Credentials</h3>
+                    
+                    <div className="bg-slate-950 border border-slate-850 rounded-2xl p-4.5 space-y-3">
+                      <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                        <span className="text-xs text-slate-400 font-mono">Full Name:</span>
+                        <span className="text-xs font-bold text-slate-100">{sessionUser.name}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                        <span className="text-xs text-slate-400 font-mono">Email Coordinates:</span>
+                        <span className="text-xs font-bold text-slate-100">{sessionUser.email}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                        <span className="text-xs text-slate-400 font-mono">Organization:</span>
+                        <span className="text-xs font-bold text-slate-100">{sessionUser.organization}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-slate-400 font-mono">Operational Clearance:</span>
+                        <span className="px-2.5 py-0.5 bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 font-extrabold text-[10px] rounded uppercase">
+                          {sessionUser.role}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Guidelines */}
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest">Quick Navigation Links</h3>
+                    
+                    <div className="grid grid-cols-1 gap-2.5">
+                      <button
+                        onClick={() => setActiveTab("dashboard")}
+                        className="p-3.5 bg-slate-950 hover:bg-slate-850 border border-slate-850 rounded-xl transition cursor-pointer text-left flex items-center justify-between group"
+                      >
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-200 group-hover:text-cyan-400">Explore Deployment Dashboard</h4>
+                          <p className="text-[10px] text-slate-400">Browse sightings feeds, alerts status, and custom grids.</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400" />
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab("expert_gis")}
+                        className="p-3.5 bg-slate-950 hover:bg-slate-850 border border-slate-850 rounded-xl transition cursor-pointer text-left flex items-center justify-between group"
+                      >
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-200 group-hover:text-cyan-400">Open GIS Expert Workspace</h4>
+                          <p className="text-[10px] text-slate-400">Access SST curves, interactive layers, and radar scans.</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400" />
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab("report")}
+                        className="p-3.5 bg-slate-950 hover:bg-slate-850 border border-slate-850 rounded-xl transition cursor-pointer text-left flex items-center justify-between group"
+                      >
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-200 group-hover:text-cyan-400">Report Instant Hazard</h4>
+                          <p className="text-[10px] text-slate-400">Upload reports, input latitude & longitude coordinates.</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+                <AuthScreen onLogin={(user) => {
+                  handleLogin(user);
+                  setActiveTab("dashboard");
+                }} />
+            )}
+          </div>
+        )}
+
         {/* =============== T10: CITIZEN REPORT HISTORY & SYSTEM PROFILE =============== */}
         {activeTab === "profile" && (
           <div className="space-y-4" id="profile-page-root">
@@ -951,7 +1567,7 @@ export default function App() {
                     {alerts.map(a => (
                       <div key={a.id} className="bg-slate-955 p-4 rounded-xl border border-red-500/10 hover:border-red-500/20 transition space-y-2 relative">
                         <div className="flex items-center justify-between text-[10px] font-mono">
-                          <span className="text-red-400 uppercase font-black">{a.severity} WARNING</span>
+                          <span className="text-red-400 uppercase font-bold">{a.severity} WARNING</span>
                           <span className="text-slate-500">{new Date(a.issuedAt).toLocaleDateString()}</span>
                         </div>
                         <h4 className="text-sm font-bold text-slate-100">{a.title}</h4>
@@ -1261,9 +1877,9 @@ export default function App() {
                       </linearGradient>
                     </defs>
                   </svg>
-                  <div className="absolute bottom-2 text-center font-mono">
-                    <span className="text-2xl font-black text-slate-100 block">72.4%</span>
-                    <span className="text-[10px] text-amber-500 font-bold uppercase tracking-widest leading-none">MODERATE TO ELEVATED</span>
+                  <div className="absolute bottom-2 text-center">
+                    <span className="text-2xl font-bold text-slate-100 block">72.4%</span>
+                    <span className="text-[10px] text-amber-500 font-bold uppercase tracking-wide leading-none">MODERATE RISK INDEX</span>
                   </div>
                 </div>
               </div>
