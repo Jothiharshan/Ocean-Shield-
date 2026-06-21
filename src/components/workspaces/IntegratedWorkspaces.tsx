@@ -425,6 +425,17 @@ export default function IntegratedWorkspaces() {
   const [activeWorkspace, setActiveWorkspace] = useState<string>("clear_seas");
   const [mobileShowDetail, setMobileShowDetail] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
+
+  // Reusable notification system for mockup buttons
+  const [customToasts, setCustomToasts] = useState<Array<{ id: string; message: string; type: "success" | "info" | "warning" }>>([]);
+
+  const triggerToast = (message: string, type: "success" | "info" | "warning" = "success") => {
+    const newToast = { id: `ctoast-${Date.now()}`, message, type };
+    setCustomToasts(prev => [...prev, newToast]);
+    setTimeout(() => {
+      setCustomToasts(prev => prev.filter(t => t.id !== newToast.id));
+    }, 4000);
+  };
   
   // States for Clear Seas (Workspace 2)
   const [showAccidentsOnly, setShowAccidentsOnly] = useState(false);
@@ -1610,7 +1621,10 @@ export default function IntegratedWorkspaces() {
                   <div className="md:col-span-8 bg-slate-950 p-4 rounded-xl border border-slate-850 space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-mono font-black text-slate-500 uppercase">NEPAL HIMALAYAN SEISMIC ZONE VECTORS</span>
-                      <button className="bg-amber-600 hover:bg-amber-500 select-none text-slate-950 text-[10px] font-mono font-black px-2 py-0.5 rounded flex items-center gap-1">
+                      <button 
+                        onClick={() => triggerToast("🚨 FIELD CONTROL: Emergency Response Vectors successfully deployed to Gorkha & Nuwakot Seismic coordinate cells.", "warning")}
+                        className="bg-amber-600 hover:bg-amber-500 select-none text-slate-950 text-[10px] font-mono font-black px-2 py-0.5 rounded flex items-center gap-1 cursor-pointer"
+                      >
                         <Plus className="w-3 h-3" />
                         <span>DEPLOY FIELD DISPATCH</span>
                       </button>
@@ -3360,10 +3374,16 @@ export default function IntegratedWorkspaces() {
                   </div>
 
                   <div className="flex justify-center gap-3 relative">
-                    <button className="px-5 py-2.5 bg-white text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl hover:bg-slate-100 transition select-none cursor-pointer">
+                    <button 
+                      onClick={() => triggerToast("🚀 Accessing OceanShield Pro SaaS licensing tier. Demo sandbox environment fully operational.", "success")}
+                      className="px-5 py-2.5 bg-white text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl hover:bg-slate-100 transition select-none cursor-pointer"
+                    >
                       Get Started Free
                     </button>
-                    <button className="px-5 py-2.5 bg-slate-900/80 border border-slate-850 hover:bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl transition select-none cursor-pointer">
+                    <button 
+                      onClick={() => triggerToast("📚 Loading Hydrographic Research & Technical Integration Manual. Standby for sensor reference sheet.", "info")}
+                      className="px-5 py-2.5 bg-slate-900/80 border border-slate-850 hover:bg-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider rounded-xl transition select-none cursor-pointer"
+                    >
                       Learn More
                     </button>
                   </div>
@@ -3395,6 +3415,27 @@ export default function IntegratedWorkspaces() {
               <span className="text-slate-700">|</span>
               <span>Coordinates: N 14°45' / E 120°05'</span>
             </div>
+          </div>
+
+          {/* TOAST LIST */}
+          <div className="fixed bottom-16 right-6 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
+            {customToasts.map((ct) => (
+              <div
+                key={ct.id}
+                className="bg-slate-900/95 backdrop-blur-md border border-cyan-500/30 p-3 rounded-xl shadow-2xl flex items-center justify-between gap-3 animate-fadeIn pointer-events-auto"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${ct.type === "warning" ? "bg-amber-400" : ct.type === "info" ? "bg-sky-400" : "bg-emerald-400"}`} />
+                  <span className="text-[10.5px] font-mono text-slate-100 leading-snug">{ct.message}</span>
+                </div>
+                <button
+                  onClick={() => setCustomToasts(prev => prev.filter(t => t.id !== ct.id))}
+                  className="text-slate-500 hover:text-slate-300 text-xs font-bold leading-none cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
           </div>
 
         </div>

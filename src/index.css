@@ -67,6 +67,15 @@
   animation: float 6s ease-in-out infinite;
 }
 
+/* Hide scrollbar for Chrome, Safari, Opera, Edge, Firefox */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* Pulse core radar sweep circle styling */
 @keyframes sweep {
   from { transform: rotate(0deg); }

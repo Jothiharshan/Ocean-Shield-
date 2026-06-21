@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { User, HazardReport, ActiveAlert, VerificationStatus, HazardCategory, UserRole } from "./types";
 import { INITIAL_HAZARD_REPORTS, INITIAL_ALERTS, MOCK_SOCIAL_TRENDS, MAP_GRID_CELLS } from "./mockData";
 import AuthScreen from "./components/AuthScreen";
+import TelemetryConsole from "./components/TelemetryConsole";
 import MarineGISMap from "./components/MarineGISMap";
 import ReportingForm from "./components/ReportingForm";
 import SocialAnalytics from "./components/SocialAnalytics";
@@ -649,8 +650,8 @@ export default function App() {
           </div>
 
           {/* DYNAMIC NAVIGATION GRID (WELL ALIGNED IN VERTICAL & HORIZONTAL PLANES WITH MULTI-ROW SEGMENTS) */}
-          <nav className="flex flex-col gap-2 p-2 bg-slate-950/20 dark:bg-slate-950/20 light:bg-[#f1f5f9]/50 border border-slate-850 dark:border-slate-850 light:border-slate-200/85 rounded-3xl shrink lg:shrink-0 lg:min-w-0 max-w-full">
-            <div className="flex flex-wrap items-center gap-1.5">
+          <nav className="flex flex-col gap-2 p-2 bg-slate-950/20 dark:bg-slate-950/20 light:bg-[#f1f5f9]/50 border border-slate-850 dark:border-slate-850 light:border-slate-200/85 rounded-3xl shrink lg:shrink-0 lg:min-w-0 max-w-full overflow-x-auto scrollbar-none">
+            <div className="flex flex-row flex-nowrap lg:flex-wrap items-center gap-1.5 shrink-0">
               <button
                 onClick={() => setActiveTab("landing")}
                 className={`px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition select-none ${
@@ -2006,6 +2007,18 @@ export default function App() {
         )}
 
       </main>
+
+      {/* TELEMETRY WEBSOCKET AND POLLING REAL-TIME TOAST & TRANSCEIVER HUB */}
+      {sessionUser && (
+        <TelemetryConsole
+          reports={reports}
+          onAddReport={handleAddReport}
+          onUpdateReportStatus={handleUpdateReportStatus}
+          selectedReportId={selectedReportId}
+          onSelectReportId={setSelectedReportId}
+          onNavigateTab={setActiveTab}
+        />
+      )}
 
     </div>
   );
