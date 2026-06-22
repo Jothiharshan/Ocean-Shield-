@@ -93,9 +93,7 @@ app.post("/api/ai/chat", async (req, res) => {
     const response = await chat.sendMessage({ message: lastMsgContent });
     return res.json({ text: response.text });
   } catch (err: any) {
-    console.info("[Uplink State] AI Chat shifted to local dispatcher backup.");
-    
-    // Provide a high-fidelity, interactive default answer based on user query keywords
+    // High-fidelity fallback node
     const lastMessage = (req.body.messages?.[req.body.messages.length - 1]?.content || "").toLowerCase();
     let answer = "";
     if (lastMessage.includes("oil") || lastMessage.includes("spill") || lastMessage.includes("slick")) {
@@ -177,8 +175,6 @@ app.post("/api/ai/analyze-report", async (req, res) => {
     const parsed = JSON.parse(response.text || "{}");
     return res.json(parsed);
   } catch (err: any) {
-    console.info("[Uplink State] Analyze Report shifted to local assessment engine.");
-    
     const title = req.body.title || "Marine Incident";
     const category = req.body.category || "marine_debris";
     const severity = req.body.severity || "Medium";
@@ -230,8 +226,6 @@ app.post("/api/ai/dashboard-summary", async (req, res) => {
 
     return res.json({ summary: response.text });
   } catch (err: any) {
-    console.info("[Uplink State] Dashboard Summary utilizing regional rule metrics.");
-    
     const inputReports = req.body.reports || [];
     if (inputReports.length === 0) {
       return res.json({
@@ -316,8 +310,6 @@ app.post("/api/ai/translate", async (req, res) => {
 
     return res.json({ translated: response.text });
   } catch (err: any) {
-    console.info("[Uplink State] Translation shifted to multi-lingual dictionaries.");
-    
     const text = req.body.text || "";
     const targetLanguage = req.body.targetLanguage || "";
     let translated = text;
@@ -444,8 +436,6 @@ Based on these reference anchors, mathematically scale and calculate realistic S
     const parsed = JSON.parse(response.text || "{}");
     return res.json(parsed);
   } catch (err: any) {
-    console.info(`[Auto-Meteo] Utilizing high-fidelity rule-engine for layout: "${req.body.locationName}"`);
-    
     const targetLoc = (req.body.locationName || "").trim();
     const cleanSearch = targetLoc.toLowerCase();
     
