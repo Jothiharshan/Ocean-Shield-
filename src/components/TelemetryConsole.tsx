@@ -107,7 +107,7 @@ export default function TelemetryConsole({
   const toastedIdsRef = useRef<Set<string>>(new Set());
   const prevReportsLengthRef = useRef<number>(reports.length);
 
-  // Play dual-tone military warning beep using native HTML5 Audio Synthesis
+  // Play a sweet, harmonious dual-bell chime using native HTML5 Audio Synthesis
   const playWarningSynth = () => {
     if (!soundEnabled) return;
     try {
@@ -115,34 +115,31 @@ export default function TelemetryConsole({
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       
-      const osc1 = ctx.createOscillator();
-      const osc2 = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      
-      osc1.type = "sine";
-      osc2.type = "sawtooth";
-      
-      // Dual emergency sirens with slight frequency detune for heavy industrial distress feel
-      osc1.frequency.setValueAtTime(820, ctx.currentTime);
-      osc1.frequency.linearRampToValueAtTime(540, ctx.currentTime + 0.18);
-      osc1.frequency.linearRampToValueAtTime(820, ctx.currentTime + 0.35);
-      
-      osc2.frequency.setValueAtTime(825, ctx.currentTime);
-      osc2.frequency.linearRampToValueAtTime(545, ctx.currentTime + 0.18);
-      osc2.frequency.linearRampToValueAtTime(825, ctx.currentTime + 0.35);
+      const playTone = (freq: number, delay: number, duration: number, maxGain: number) => {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+        
+        gainNode.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+        gainNode.gain.linearRampToValueAtTime(maxGain, ctx.currentTime + delay + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration - 0.01);
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + duration);
+      };
 
-      gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.05);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.38);
-      
-      osc1.connect(gainNode);
-      osc2.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      osc1.start();
-      osc2.start();
-      osc1.stop(ctx.currentTime + 0.4);
-      osc2.stop(ctx.currentTime + 0.4);
+      // Play a beautiful, sweet "ding-dong" chime using harmonious frequencies (E5 and G#5)
+      // First high sweet bell
+      playTone(659.25, 0, 0.65, 0.06);     // E5 note
+      // Second bell, slightly delayed, playing a sweet perfect third interval
+      playTone(830.61, 0.12, 0.75, 0.05);  // G#5 note
+      // A soft warm sub-octave tone for rich fidelity
+      playTone(329.63, 0, 0.85, 0.03);     // E4 note
     } catch (err) {
       console.warn("Audio Context blocked or unsupported before user gesture:", err);
     }
