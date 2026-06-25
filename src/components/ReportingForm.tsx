@@ -54,6 +54,14 @@ export default function ReportingForm({
   const [isListening, setIsListening] = useState(false);
   const [listeningTimer, setListeningTimer] = useState(0);
 
+  // Offline Data Collection & Sync support states
+  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(false);
+  const [offlineQueue, setOfflineQueue] = useState<HazardReport[]>(() => {
+    const cached = localStorage.getItem("oceanshield_offline_queue");
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [syncStatusMsg, setSyncStatusMsg] = useState("");
+
   // Real Speech Recognition state
   const [isRealListening, setIsRealListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
@@ -489,8 +497,29 @@ export default function ReportingForm({
       riskTrend: finalRiskTrend
     };
 
-    onAddReport(report);
-    resetForm();
+    if (isOfflineMode) {
+      const updatedQueue = [...offlineQueue, report];
+      setOfflineQueue(updatedQueue);
+      localStorage.setItem("oceanshield_offline_queue", JSON.stringify(updatedQueue));
+      setSyncStatusMsg("⚠️ Offline Mode: 1 report was saved in local queue storage. Switch simulator to ONLINE to sync!");
+      resetForm();
+    } else {
+      onAddReport(report);
+      resetForm();
+    }
+  };
+
+  const handleSyncQueue = () => {
+    if (offlineQueue.length === 0) return;
+    setSyncStatusMsg("Initiating batch synchronization with maritime sentinel database...");
+    setTimeout(() => {
+      offlineQueue.forEach((rep) => {
+        onAddReport(rep);
+      });
+      setOfflineQueue([]);
+      localStorage.removeItem("oceanshield_offline_queue");
+      setSyncStatusMsg(`✓ Successfully synced ${offlineQueue.length} coastal incident reports with online database!`);
+    }, 1500);
   };
 
   const resetForm = () => {
@@ -552,6 +581,62 @@ export default function ReportingForm({
             {isFindingGps ? <Loader className="w-3.5 h-3.5 animate-spin text-cyan-400" /> : <Navigation className="w-3.5 h-3.5" />}
             <span>{isFindingGps ? "LOCATING..." : "GPS LOCK AUTOFILL"}</span>
           </button>
+        </div>
+
+        {/* OFFLINE DATA COLLECTION & QUEUE SYNC CENTER */}
+        <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${isOfflineMode ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
+              <span className="text-[10px] font-bold text-slate-350 uppercase font-mono tracking-wider">
+                Uplink: {isOfflineMode ? "OFFLINE BUFFER QUEUE RUNNING" : "ONLINE / SATELLITE ACTIVE"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsOfflineMode(!isOfflineMode);
+                setSyncStatusMsg("");
+              }}
+              className={`text-[9px] font-mono font-bold px-2 py-1 rounded border cursor-pointer select-none transition-all ${
+                isOfflineMode
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-600/20"
+                  : "bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200"
+              }`}
+            >
+              Set {isOfflineMode ? "🟢 ONLINE" : "🟡 OFFLINE SIM"}
+            </button>
+          </div>
+
+          {offlineQueue.length > 0 && (
+            <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-xl flex-wrap gap-2 animate-in fade-in duration-300">
+              <div className="text-left">
+                <p className="text-[10px] text-amber-300 font-bold font-mono uppercase">
+                  🚨 {offlineQueue.length} COASTAL RECORDINGS CACHED
+                </p>
+                <p className="text-[9.5px] text-slate-400">
+                  Stored in local HTML5 sandbox. Reconnect signaling when back within range.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSyncQueue}
+                className="bg-amber-500 hover:bg-amber-600 font-bold font-heading text-[10px] px-3 py-1 text-slate-950 rounded-lg shadow-sm cursor-pointer select-none transition"
+              >
+                Sync Now
+              </button>
+            </div>
+          )}
+
+          {syncStatusMsg && (
+            <div className={`p-2 rounded-lg text-center text-[10px] font-mono font-semibold relative ${
+              syncStatusMsg.startsWith("✓")
+                ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                : "bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 animate-pulse"
+            }`}>
+              {syncStatusMsg}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

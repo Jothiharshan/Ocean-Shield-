@@ -90,7 +90,7 @@ export default function TelemetryConsole({
   const [isOpen, setIsOpen] = useState(false);
   const [streamMode, setStreamMode] = useState<"socket" | "polling" | "static">("socket");
   const [isSimulatingFeed, setIsSimulatingFeed] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(false);
   const [pollingRateSeconds, setPollingRateSeconds] = useState(12);
   const [lastCheckTime, setLastCheckTime] = useState<string>("SYSTEM START");
   const [connectionLatency, setConnectionLatency] = useState<number>(34);

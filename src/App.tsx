@@ -62,7 +62,8 @@ import {
   Waves,
   Wind,
   Thermometer,
-  Gauge
+  Gauge,
+  Globe
 } from "lucide-react";
 
 const WEATHER_DATA = {
@@ -248,6 +249,19 @@ export default function App() {
     const cachedTheme = localStorage.getItem("oceanshield_theme") as "dark" | "light" | null;
     return cachedTheme || "dark";
   });
+
+  const [globalLang, setGlobalLang] = useState<string>("English");
+
+  const getSubTitleText = () => {
+    switch (globalLang) {
+      case "Tagalog": return "Propesyonal na Kaligtasan sa Karagatan, Panahon at Platform ng mga Report sa Insidente";
+      case "Spanish": return "Plataforma Profesional de Seguridad Oceánica, Clima y Despacho de Incidentes";
+      case "Vietnamese": return "Nền tảng Điều phối Sự cố, Thời tiết & An toàn Đại dương Chuyên nghiệp";
+      case "Chinese": return "专业海洋安全、天气与事件调度平台";
+      case "Hindi": return "पेशावर महासागर सुरक्षा, मौसम और घटना प्रेषण मंच";
+      default: return "Professional Ocean Safety, Weather & Incident Dispatch Platform";
+    }
+  };
 
   const getNavItems = () => {
     const role = sessionUser?.role || "Citizen";
@@ -711,7 +725,7 @@ export default function App() {
                   AI Core
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">Professional Ocean Safety, Weather & Incident Dispatch Platform</p>
+              <p className="text-xs text-slate-400 hidden sm:block">{getSubTitleText()}</p>
             </div>
           </div>
 
@@ -1119,6 +1133,24 @@ export default function App() {
                 <option value="Researcher" className="bg-slate-900 text-slate-100">Researcher</option>
                 <option value="Authority" className="bg-slate-900 text-slate-100">Authority</option>
                 <option value="Admin" className="bg-slate-900 text-slate-100">Admin</option>
+              </select>
+            </div>
+
+            {/* Global Language Selector for regional accessibility */}
+            <div className="flex items-center gap-1.5 bg-slate-950 p-1.5 px-3 border border-slate-850 rounded-xl max-h-12 text-xs shrink-0 select-none">
+              <Globe className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              <select
+                value={globalLang}
+                onChange={(e) => setGlobalLang(e.target.value)}
+                className="bg-transparent text-indigo-400 font-mono font-bold text-[10px] outline-none border-none py-0 cursor-pointer select-none"
+                id="global-language-selector"
+              >
+                <option value="English" className="bg-slate-900 text-slate-100">English (EN)</option>
+                <option value="Tagalog" className="bg-slate-900 text-slate-100">Tagalog (PH)</option>
+                <option value="Spanish" className="bg-slate-900 text-slate-100">Español (ES)</option>
+                <option value="Vietnamese" className="bg-slate-900 text-slate-100">Tiếng Việt (VN)</option>
+                <option value="Chinese" className="bg-slate-900 text-slate-100">中文 (ZH)</option>
+                <option value="Hindi" className="bg-slate-900 text-slate-100">हिंदी (HI)</option>
               </select>
             </div>
 

@@ -27,9 +27,19 @@ export default function MarineGISMap({
   const [activeLayerCurrents, setActiveLayerCurrents] = useState<boolean>(true);
   const [activeLayerGrid, setActiveLayerGrid] = useState<boolean>(true);
   const [activeLayerRadar, setActiveLayerRadar] = useState<boolean>(true);
+  const [activeLayerSocial, setActiveLayerSocial] = useState<boolean>(true);
+  const [activeLayerHotspots, setActiveLayerHotspots] = useState<boolean>(true);
+  const [selectedSocialPostId, setSelectedSocialPostId] = useState<string | null>(null);
   const [selectedGridCell, setSelectedGridCell] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
+
+  const MOCK_GEOTAGGED_SOCIAL_POSTS = [
+    { id: "soc-1", platform: "X", handle: "@BataanGuardians", text: "Alert: Fuel slick sheen drifting 12 miles west of Mariveles outer reef flats. Heavy residue seen. #oil_slick_delta", tag: "oil_slick_delta", lat: 14.56, lng: 120.15, reach: "18.5K", category: "oil_spill" },
+    { id: "soc-2", platform: "Facebook", handle: "@SubicEcoDiver", text: "Bleaching pockets spotted in shallow zone Sub-Sector Alpha-3. Warning to scientific groups. #bleaching_coralgardens", tag: "bleaching_coralgardens", lat: 14.71, lng: 120.41, reach: "12.3K", category: "coral_bleaching" },
+    { id: "soc-3", platform: "X", handle: "@SeaWatchPH", text: "Intruders spotted! High-intensity trawler active inside Marine Sanctuary limits without transponder. #illegaltrawling", tag: "illegaltrawling", lat: 14.62, lng: 120.30, reach: "9.6K", category: "illegal_fishing" },
+    { id: "soc-4", platform: "Instagram", handle: "@ManilaAquaResearch", text: "Toxic algal bloom (red-tide indicator) lab specimen verified. Advising zero local shellfish collection. #redtide", tag: "redtide", lat: 14.49, lng: 120.38, reach: "22.0K", category: "toxic_algae" }
+  ];
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -204,6 +214,24 @@ export default function MarineGISMap({
             >
               <Eye className="w-3.5 h-3.5" />
             </button>
+            <button
+              onClick={() => setActiveLayerHotspots(!activeLayerHotspots)}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+                activeLayerHotspots ? "bg-red-500/25 text-red-400 border border-red-500/20 font-black animate-pulse" : "text-slate-500 hover:text-slate-350"
+              }`}
+              title="Toggle Dynamic Thermal Hotspot Engine"
+            >
+              <span className="font-mono text-[9px] uppercase font-sans">🔥 HOTSPOTS</span>
+            </button>
+            <button
+              onClick={() => setActiveLayerSocial(!activeLayerSocial)}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-all ${
+                activeLayerSocial ? "bg-indigo-500/25 text-indigo-300 border border-indigo-500/20 font-bold" : "text-slate-500 hover:text-slate-350"
+              }`}
+              title="Toggle Social NLP Scraper Overlay"
+            >
+              <span className="font-mono text-[9px] uppercase font-sans">💬 SOCIAL</span>
+            </button>
           </div>
         </div>
       </div>
@@ -239,6 +267,26 @@ export default function MarineGISMap({
             <pattern id="marineGrid" width="60" height="60" patternUnits="userSpaceOnUse">
               <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ffffff" strokeOpacity="0.03" strokeWidth="0.5" />
             </pattern>
+            <radialGradient id="hotspotRed" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.5" />
+              <stop offset="35%" stopColor="#ef4444" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id="hotspotAmber" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.45" />
+              <stop offset="40%" stopColor="#f59e0b" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id="hotspotGreen" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+              <stop offset="45%" stopColor="#10b981" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+            </radialGradient>
+            <radialGradient id="hotspotBlue" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.45" />
+              <stop offset="40%" stopColor="#0ea5e9" stopOpacity="0.2" />
+              <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+            </radialGradient>
           </defs>
 
           {/* Deep Ocean base */}
@@ -353,6 +401,102 @@ export default function MarineGISMap({
                   repeatCount="indefinite"
                 />
               </line>
+            </g>
+          )}
+
+          {/* Dynamic Hotspots Heat Cloud Renderer */}
+          {activeLayerHotspots && (
+            <g opacity="0.6" style={{ mixBlendMode: "screen" }}>
+              {filteredReports.map((report) => {
+                const coords = getSvgCoordinates(report.latitude, report.longitude);
+                let gradientId = "hotspotBlue";
+                if (report.severity === "Critical") gradientId = "hotspotRed";
+                else if (report.severity === "High") gradientId = "hotspotAmber";
+                else if (report.category === "illegal_fishing") gradientId = "hotspotGreen";
+
+                return (
+                  <circle
+                    key={`hotspot-${report.id}`}
+                    cx={coords.x}
+                    cy={coords.y}
+                    r={report.severity === "Critical" ? 65 : report.severity === "High" ? 45 : 30}
+                    fill={`url(#${gradientId})`}
+                    className="pointer-events-none transition-all duration-500 animate-pulse"
+                    style={{ animationDuration: "3s" }}
+                  />
+                );
+              })}
+            </g>
+          )}
+
+          {/* Geotagged Social Media NLP activity indicator layer */}
+          {activeLayerSocial && (
+            <g>
+              {MOCK_GEOTAGGED_SOCIAL_POSTS.map((post) => {
+                const coords = getSvgCoordinates(post.lat, post.lng);
+                const isSelected = selectedSocialPostId === post.id;
+                return (
+                  <g
+                    key={post.id}
+                    className="cursor-pointer group/soc"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectReport(null); // Clear active report selection
+                      setSelectedSocialPostId(isSelected ? null : post.id);
+                    }}
+                  >
+                    {/* Glowing social ripple rings */}
+                    <circle
+                      cx={coords.x}
+                      cy={coords.y}
+                      r={14}
+                      fill="none"
+                      stroke="#6366f1"
+                      strokeWidth="1"
+                      strokeDasharray="2,2"
+                      opacity="0.8"
+                    >
+                      <animate
+                        attributeName="r"
+                        values="7;18"
+                        dur="2.8s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.8;0"
+                        dur="2.8s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+
+                    {/* Little social pin badge (indigo or violet) */}
+                    <circle
+                      cx={coords.x}
+                      cy={coords.y}
+                      r={isSelected ? 10 : 7.5}
+                      fill="#6366f1"
+                      stroke="#ffffff"
+                      strokeWidth="1.5"
+                      className="transition-all duration-300 group-hover/soc:scale-125 select-none"
+                    />
+
+                    {/* Small visual character inside the circle representing social */}
+                    <text
+                      x={coords.x}
+                      y={coords.y + 2.5}
+                      textAnchor="middle"
+                      fill="#ffffff"
+                      fontSize="8"
+                      fontWeight="bold"
+                      fontFamily="sans-serif"
+                      className="pointer-events-none select-none"
+                    >
+                      {post.platform === "Facebook" ? "f" : "x"}
+                    </text>
+                  </g>
+                );
+              })}
             </g>
           )}
 
@@ -474,6 +618,54 @@ export default function MarineGISMap({
                   </div>
                   <button
                     onClick={() => onSelectReport(null)}
+                    className="text-slate-400 hover:text-slate-200 p-1 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            );
+          })()
+        )}
+
+        {selectedSocialPostId && (
+          (() => {
+            const post = MOCK_GEOTAGGED_SOCIAL_POSTS.find((p) => p.id === selectedSocialPostId);
+            if (!post) return null;
+            const markerColor = getCategoryColor(post.category as any);
+
+            return (
+              <div className="absolute bottom-4 left-4 right-4 bg-slate-900/95 border border-indigo-500/40 rounded-xl p-4 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-300 pointer-events-auto">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2.5">
+                    <div
+                      className="p-1.5 rounded-lg text-indigo-400 text-xs font-semibold shrink-0 bg-indigo-500/10 border border-indigo-500/20"
+                    >
+                      <span className="font-mono font-black uppercase text-xs">NLP</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] uppercase font-bold text-indigo-450 font-mono">
+                          {post.platform} NLP FEED DETECTOR
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.2 bg-indigo-950/40 border border-indigo-850 rounded text-indigo-300">
+                          Estimated Reach: {post.reach}
+                        </span>
+                        <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 bg-slate-800 rounded text-slate-350">
+                          #{post.tag}
+                        </span>
+                      </div>
+                      <h4 className="text-slate-100 font-medium text-xs mt-1.5 leading-relaxed">
+                        <strong className="text-indigo-400">{post.handle}</strong>: "{post.text}"
+                      </h4>
+                      <div className="flex gap-4 text-[10px] text-slate-450 mt-2 font-mono">
+                        <span>LAT/LNG: {post.lat.toFixed(3)}°N, {post.lng.toFixed(3)}°E</span>
+                        <span>INDICATOR: <span className="font-semibold text-rose-450 uppercase">{post.category.replace("_", " ")}</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedSocialPostId(null)}
                     className="text-slate-400 hover:text-slate-200 p-1 cursor-pointer"
                   >
                     ✕
