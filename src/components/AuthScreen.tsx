@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { User, UserRole } from "../types";
-import { User as UserIcon, Lock, Mail, Facebook, Twitter, Compass } from "lucide-react";
+import { User as UserIcon, Lock, Mail, Facebook, Twitter, Compass, Globe } from "lucide-react";
 import { getTranslation } from "../utils/translations";
 
 interface AuthScreenProps {
   onLogin: (user: User) => void;
   lang?: string;
+  onLangChange?: (lang: string) => void;
 }
 
-export default function AuthScreen({ onLogin, lang = "English" }: AuthScreenProps) {
+export default function AuthScreen({ onLogin, lang = "English", onLangChange }: AuthScreenProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<UserRole>("Citizen");
@@ -122,6 +123,23 @@ export default function AuthScreen({ onLogin, lang = "English" }: AuthScreenProp
 
   return (
     <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-4 md:p-8 relative overflow-hidden" id="auth-portal-screen">
+      
+      {/* Absolute positioned Global Language Selector on the Login Screen */}
+      <div className="absolute top-4 right-4 z-40 flex items-center gap-1.5 bg-slate-900/95 backdrop-blur-md p-1.5 px-3 border border-slate-800 rounded-xl max-h-12 text-xs shrink-0 select-none">
+        <Globe className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+        <select
+          value={lang}
+          onChange={(e) => onLangChange?.(e.target.value)}
+          className="bg-transparent text-indigo-400 font-mono font-bold text-[10px] outline-none border-none py-0 cursor-pointer select-none"
+        >
+          <option value="English" className="bg-slate-950 text-slate-100">English (EN)</option>
+          <option value="Hindi" className="bg-slate-950 text-slate-100">हिंदी (HI)</option>
+          <option value="Tamil" className="bg-slate-950 text-slate-100">தமிழ் (TA)</option>
+          <option value="Telugu" className="bg-slate-950 text-slate-100">తెలుగు (TE)</option>
+          <option value="Kannada" className="bg-slate-950 text-slate-100">ಕನ್ನಡ (KN)</option>
+          <option value="Malayalam" className="bg-slate-950 text-slate-100">മലയാളം (ML)</option>
+        </select>
+      </div>
       
       {/* Simulation load portal overlay */}
       {isAuthLoading && (
