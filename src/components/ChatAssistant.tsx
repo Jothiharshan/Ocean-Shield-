@@ -11,7 +11,7 @@ export default function ChatAssistant({ currentUserRole }: ChatAssistantProps) {
     {
       id: "welcome",
       sender: "ai",
-      content: "Awaiting frequency... OceanShield AI Tactical Subsystem active. I can compute diesel spill containment workflows, identify vessel transponder discrepancies, analyze reef temperatures, or assist with localized translation. How may I support your coastal operation today?",
+      content: "Awaiting frequency... OceanShield AI Tactical Subsystem active. I can compute diesel spill containment workflows, identify vessel transponder discrepancies, analyse reef temperatures, or assist with localised translation. How may I support your coastal operation today?",
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -27,12 +27,12 @@ export default function ChatAssistant({ currentUserRole }: ChatAssistantProps) {
   // Command panel quick answers tailored to active user roles
   const ROLE_PRESETS = {
     Fisherman: [
-      { label: "Diesel Leak Mitigation", prompt: "How do I contain a localized diesel spill with basic gear?" },
+      { label: "Diesel Leak Mitigation", prompt: "How do I contain a localised diesel spill with basic gear?" },
       { label: "Red Tide Ocean Safety", prompt: "What are the safe parameters for fishing during a Harmful Algal Bloom?" },
     ],
     Researcher: [
       { label: "Bleach Sampling Plan", prompt: "Explain the standard protocol for documenting coral bleaching percentages in shallow reefs." },
-      { label: "Sea Temp Anomalies", prompt: "How does a localized +2°C Sea Surface Temperature anomaly impact benthic seagrass beds?" },
+      { label: "Sea Temp Anomalies", prompt: "How does a localised +2°C Sea Surface Temperature anomaly impact benthic seagrass beds?" },
     ],
     Authority: [
       { label: "AIS Compliance Codes", prompt: "What is the typical procedure to handle a commercial pair-trawler operating inside a no-take marine sanctuary?" },
@@ -97,7 +97,7 @@ export default function ChatAssistant({ currentUserRole }: ChatAssistantProps) {
 
       if (lowerText.includes("diesel") || lowerText.includes("spill") || lowerText.includes("oil")) {
         simResponse = `[SIMULATED ADVISORY - CRITICAL SPILL RESPONSE]
-        To contain a localized petroleum/diesel spill with local maritime gear:
+        To contain a localised petroleum/diesel spill with local maritime gear:
         
         1. Deploy high-capacity coconut coir absorbent booms or straws around the spill perimeter immediately to stop active drift.
         2. Avoid using general household detergents; they sink petroleum droplets into benthic seagrass zones, compounding ecological damage.

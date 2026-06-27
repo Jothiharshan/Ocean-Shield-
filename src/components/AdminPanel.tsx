@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { HazardReport, ActiveAlert, HazardCategory, SeverityLevel, VerificationStatus } from "../types";
 import { ShieldCheck, ShieldAlert, AlertTriangle, CheckSquare, Trash, Volume2, Plus, Info, Clock, Check, X } from "lucide-react";
+import { formatDateTimeUTC } from "../utils/translations";
 
 interface AdminPanelProps {
   reports: HazardReport[];
@@ -347,7 +348,7 @@ export default function AdminPanel({
 
                 <div className="pt-1.5 border-t border-slate-900 text-[9px] text-slate-500 font-mono space-y-0.5">
                   <div>RADIUS: <span className="text-slate-350">{alert.affectedCoordinates.radiusKm} KM</span></div>
-                  <div>EXPIRES: <span className="text-slate-350">{new Date(alert.expiresAt).toLocaleString().substring(0, 16)}</span></div>
+                  <div>EXPIRES: <span className="text-slate-350">{formatDateTimeUTC(alert.expiresAt)}</span></div>
                 </div>
               </div>
             ))}

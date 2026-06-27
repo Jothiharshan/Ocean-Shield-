@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HazardReport, User, UserRole, VerificationStatus } from "../types";
 import { ShieldCheck, ShieldAlert, Sparkles, MapPin, Calendar, Check, MessageSquare, Send, Trash, Eye, ArrowLeft, Clock, Camera } from "lucide-react";
+import { formatDateTimeUTC } from "../utils/translations";
 
 interface Comment {
   id: string;
@@ -176,7 +177,7 @@ export default function ReportDetails({
               </div>
               <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                {new Date(report.reportedAt).toLocaleString()}
+                {formatDateTimeUTC(report.reportedAt)}
               </span>
             </div>
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { User, HazardReport, ActiveAlert, VerificationStatus, HazardCategory, UserRole } from "./types";
+import { getTranslation, formatDateUTC, formatDateTimeUTC } from "./utils/translations";
 import { INITIAL_HAZARD_REPORTS, INITIAL_ALERTS, MOCK_SOCIAL_TRENDS, MAP_GRID_CELLS } from "./mockData";
 import AuthScreen from "./components/AuthScreen";
 import TelemetryConsole from "./components/TelemetryConsole";
@@ -253,14 +254,7 @@ export default function App() {
   const [globalLang, setGlobalLang] = useState<string>("English");
 
   const getSubTitleText = () => {
-    switch (globalLang) {
-      case "Tagalog": return "Propesyonal na Kaligtasan sa Karagatan, Panahon at Platform ng mga Report sa Insidente";
-      case "Spanish": return "Plataforma Profesional de Seguridad Oceánica, Clima y Despacho de Incidentes";
-      case "Vietnamese": return "Nền tảng Điều phối Sự cố, Thời tiết & An toàn Đại dương Chuyên nghiệp";
-      case "Chinese": return "专业海洋安全、天气与事件调度平台";
-      case "Hindi": return "पेशावर महासागर सुरक्षा, मौसम और घटना प्रेषण मंच";
-      default: return "Professional Ocean Safety, Weather & Incident Dispatch Platform";
-    }
+    return getTranslation(globalLang, "subtitle", "Professional Ocean Safety, Weather & Incident Dispatch Platform");
   };
 
   const getNavItems = () => {
@@ -268,61 +262,61 @@ export default function App() {
 
     if (role === "Citizen") {
       return [
-        { id: "dashboard", label: "Citizen Dashboard", icon: Grid },
-        { id: "expert_gis", label: "Expert Workspaces", icon: Map },
-        { id: "report", label: "Report Hazard", icon: FileText },
-        { id: "profile", label: "My Reports & Profile", icon: UserCheck },
-        { id: "alerts", label: "Alerts & Dispatches", icon: AlertTriangle },
-        { id: "assistant", label: "AI Assistant", icon: Bot },
+        { id: "dashboard", label: getTranslation(globalLang, "nav_dashboard_citizen", "Citizen Dashboard"), icon: Grid },
+        { id: "expert_gis", label: getTranslation(globalLang, "nav_expert_gis", "Expert Workspaces"), icon: Map },
+        { id: "report", label: getTranslation(globalLang, "nav_report", "Report Hazard"), icon: FileText },
+        { id: "profile", label: getTranslation(globalLang, "nav_profile", "My Reports & Profile"), icon: UserCheck },
+        { id: "alerts", label: getTranslation(globalLang, "nav_alerts", "Alerts & Dispatches"), icon: AlertTriangle },
+        { id: "assistant", label: getTranslation(globalLang, "nav_assistant", "AI Assistant"), icon: Bot },
       ];
     }
     if (role === "Fisherman") {
       return [
-        { id: "dashboard", label: "Fisherman Dashboard", icon: Grid },
-        { id: "expert_gis", label: "Expert Workspaces", icon: Map },
-        { id: "safezones", label: "Safe Zones", icon: Compass },
-        { id: "map", label: "Ocean Map", icon: Layers },
-        { id: "alerts", label: "Hazard Alerts", icon: AlertTriangle },
-        { id: "report", label: "Report Hazard", icon: FileText },
-        { id: "assistant", label: "AI Assistant", icon: Bot },
+        { id: "dashboard", label: getTranslation(globalLang, "nav_dashboard_fisherman", "Fisherman Dashboard"), icon: Grid },
+        { id: "expert_gis", label: getTranslation(globalLang, "nav_expert_gis", "Expert Workspaces"), icon: Map },
+        { id: "safezones", label: getTranslation(globalLang, "nav_safezones", "Safe Zones"), icon: Compass },
+        { id: "map", label: getTranslation(globalLang, "nav_map", "Ocean Map"), icon: Layers },
+        { id: "alerts", label: getTranslation(globalLang, "nav_alerts", "Hazard Alerts"), icon: AlertTriangle },
+        { id: "report", label: getTranslation(globalLang, "nav_report", "Report Hazard"), icon: FileText },
+        { id: "assistant", label: getTranslation(globalLang, "nav_assistant", "AI Assistant"), icon: Bot },
       ];
     }
     if (role === "Researcher") {
       return [
-        { id: "dashboard", label: "Researcher Dashboard", icon: Grid },
-        { id: "expert_gis", label: "Expert Workspaces", icon: Map },
-        { id: "analytics", label: "Analytics Trends", icon: Activity },
-        { id: "safezones", label: "Heatmaps Viewer", icon: Layers },
-        { id: "export", label: "Export Raw Data", icon: Database },
-        { id: "reports", label: "Logged Reports", icon: FileText },
-        { id: "insights", label: "Science Insights", icon: Sparkles },
+        { id: "dashboard", label: getTranslation(globalLang, "nav_dashboard_researcher", "Researcher Dashboard"), icon: Grid },
+        { id: "expert_gis", label: getTranslation(globalLang, "nav_expert_gis", "Expert Workspaces"), icon: Map },
+        { id: "analytics", label: getTranslation(globalLang, "nav_analytics", "Analysis Trends"), icon: Activity },
+        { id: "safezones", label: getTranslation(globalLang, "nav_safezones", "Heatmaps Viewer"), icon: Layers },
+        { id: "export", label: getTranslation(globalLang, "nav_export", "Export Raw Data"), icon: Database },
+        { id: "reports", label: getTranslation(globalLang, "nav_reports", "Logged Reports"), icon: FileText },
+        { id: "insights", label: getTranslation(globalLang, "nav_insights", "Science Insights"), icon: Sparkles },
       ];
     }
     if (role === "Authority") {
       return [
-        { id: "dashboard", label: "Authority Dashboard", icon: Grid },
-        { id: "expert_gis", label: "Expert Workspaces", icon: Map },
-        { id: "verification", label: "Verification Queue", icon: ShieldCheck },
-        { id: "alerts", label: "Issue Advisories", icon: AlertTriangle },
-        { id: "map", label: "GIS Patrol Map", icon: Layers },
-        { id: "impact", label: "Impact Metrics", icon: Heart },
+        { id: "dashboard", label: getTranslation(globalLang, "nav_dashboard_authority", "Authority Dashboard"), icon: Grid },
+        { id: "expert_gis", label: getTranslation(globalLang, "nav_expert_gis", "Expert Workspaces"), icon: Map },
+        { id: "verification", label: getTranslation(globalLang, "nav_verification", "Verification Queue"), icon: ShieldCheck },
+        { id: "alerts", label: getTranslation(globalLang, "nav_alerts", "Issue Advisories"), icon: AlertTriangle },
+        { id: "map", label: getTranslation(globalLang, "nav_map", "GIS Patrol Map"), icon: Layers },
+        { id: "impact", label: getTranslation(globalLang, "nav_impact", "Impact Metrics"), icon: Heart },
       ];
     }
     if (role === "Admin") {
       return [
-        { id: "dashboard", label: "Root Cockpit", icon: Grid },
-        { id: "expert_gis", label: "Expert Workspaces", icon: Map },
-        { id: "users", label: "Operator Clearances", icon: UserCheck },
-        { id: "reports", label: "Raw Databases", icon: Database },
-        { id: "aiconfig", label: "AI Hyperparameters", icon: Sparkles },
-        { id: "settings", label: "Security Settings", icon: Lock },
-        { id: "monitoring", label: "Container Monitoring", icon: Cpu },
+        { id: "dashboard", label: getTranslation(globalLang, "nav_dashboard_admin", "Root Cockpit"), icon: Grid },
+        { id: "expert_gis", label: getTranslation(globalLang, "nav_expert_gis", "Expert Workspaces"), icon: Map },
+        { id: "users", label: getTranslation(globalLang, "nav_users", "Operator Clearances"), icon: UserCheck },
+        { id: "reports", label: getTranslation(globalLang, "nav_reports", "Raw Databases"), icon: Database },
+        { id: "aiconfig", label: getTranslation(globalLang, "nav_aiconfig", "AI Hyperparameters"), icon: Sparkles },
+        { id: "settings", label: getTranslation(globalLang, "nav_settings", "Security Settings"), icon: Lock },
+        { id: "monitoring", label: getTranslation(globalLang, "nav_monitoring", "Container Monitoring"), icon: Cpu },
       ];
     }
     return [
-      { id: "landing", label: "Home", icon: Home },
-      { id: "dashboard", label: "Dashboard", icon: Grid },
-      { id: "expert_gis", label: "Expert Workspaces", icon: Map },
+      { id: "landing", label: getTranslation(globalLang, "nav_landing", "Home"), icon: Home },
+      { id: "dashboard", label: getTranslation(globalLang, "nav_dashboard", "Dashboard"), icon: Grid },
+      { id: "expert_gis", label: getTranslation(globalLang, "nav_expert_gis", "Expert Workspaces"), icon: Map },
     ];
   };
 
@@ -1146,11 +1140,11 @@ export default function App() {
                 id="global-language-selector"
               >
                 <option value="English" className="bg-slate-900 text-slate-100">English (EN)</option>
-                <option value="Tagalog" className="bg-slate-900 text-slate-100">Tagalog (PH)</option>
-                <option value="Spanish" className="bg-slate-900 text-slate-100">Español (ES)</option>
-                <option value="Vietnamese" className="bg-slate-900 text-slate-100">Tiếng Việt (VN)</option>
-                <option value="Chinese" className="bg-slate-900 text-slate-100">中文 (ZH)</option>
                 <option value="Hindi" className="bg-slate-900 text-slate-100">हिंदी (HI)</option>
+                <option value="Tamil" className="bg-slate-900 text-slate-100">தமிழ் (TA)</option>
+                <option value="Telugu" className="bg-slate-900 text-slate-100">తెలుగు (TE)</option>
+                <option value="Kannada" className="bg-slate-900 text-slate-100">ಕನ್ನಡ (KN)</option>
+                <option value="Malayalam" className="bg-slate-900 text-slate-100">മലയാളം (ML)</option>
               </select>
             </div>
 
@@ -1212,18 +1206,18 @@ export default function App() {
               <div className="lg:col-span-7 space-y-6 text-left">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-full text-xs font-mono font-bold uppercase animate-float">
                   <Sparkles className="w-4 h-4" />
-                  <span>PREMIUM ARTIFICIAL HYDROGRAPHIC INTEGRATION</span>
+                  <span>{getTranslation(globalLang, "tagline", "PREMIUM ARTIFICIAL HYDROGRAPHIC INTEGRATION")}</span>
                 </div>
                 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading tracking-tight leading-none text-slate-100">
-                  Monitor Ocean Hazards <br />
+                  {getTranslation(globalLang, "hero_title_1", "Monitor Ocean Hazards")} <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">
-                    with AI + Citizens
+                    {getTranslation(globalLang, "hero_title_2", "with AI + Citizens")}
                   </span>
                 </h1>
 
                 <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl">
-                  OceanShield is a high-performance crowdsourced surveillance system interfacing deep ocean social analytics with live satellite geospatial overlays. Report anomalies, sketch tactical plumes, and security-verify incidents in real-time.
+                  {getTranslation(globalLang, "hero_desc", "OceanShield is a high-performance crowdsourced surveillance system interfacing deep ocean social analytics with live satellite geospatial overlays. Report anomalies, sketch tactical plumes, and security-verify incidents in real-time.")}
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-2">
@@ -1234,7 +1228,7 @@ export default function App() {
                     }}
                     className="px-6 py-3.5 bg-cyan-500 hover:bg-cyan-600 active:scale-95 text-slate-950 font-extrabold text-xs tracking-wider uppercase rounded-xl transition shadow-lg shadow-cyan-500/15 cursor-pointer font-heading"
                   >
-                    Report Hazard Sighting
+                    {getTranslation(globalLang, "btn_report_hazard", "Report Hazard Sighting")}
                   </button>
 
                   <button
@@ -1244,7 +1238,7 @@ export default function App() {
                     }}
                     className="px-6 py-3.5 bg-slate-900 hover:bg-slate-850 active:scale-95 text-cyan-400 font-bold text-xs tracking-wider uppercase rounded-xl border border-cyan-500/20 transition cursor-pointer font-heading"
                   >
-                    Explore Dashboard Live
+                    {getTranslation(globalLang, "btn_explore_live", "Explore Dashboard Live")}
                   </button>
 
                   <button
@@ -1252,7 +1246,7 @@ export default function App() {
                     className="px-6 py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 active:scale-95 text-white font-bold text-xs tracking-wider uppercase rounded-xl border border-violet-500/20 transition cursor-pointer font-heading flex items-center gap-2"
                   >
                     <Lock className="w-3.5 h-3.5 text-violet-200" />
-                    <span>Access Portal (Login / Logout)</span>
+                    <span>{getTranslation(globalLang, "btn_access_portal", "Access Portal (Login / Logout)")}</span>
                   </button>
                 </div>
               </div>
@@ -1288,7 +1282,7 @@ export default function App() {
 
                   {/* Compass grid readouts */}
                   <div className="absolute bottom-4 text-center font-mono text-[10px] text-slate-400 tracking-wider font-semibold uppercase z-20">
-                    Sensing Active Location
+                    {getTranslation(globalLang, "radar_status", "Sensing Active Location")}
                   </div>
                   
                   <div className="flex flex-col items-center gap-1 z-20">
@@ -1305,35 +1299,35 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-850 text-left space-y-2 hover:border-slate-800 transition">
-                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">Incident Sighting Records</span>
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">{getTranslation(globalLang, "counter_records_title", "Incident Sighting Records")}</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-extrabold font-heading text-slate-100">324+</span>
                     <span className="text-xs text-cyan-400 font-bold font-mono">Registered Sightings</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Visual anomalies logged securely dynamically spanning shipping lanes and fragile reef zones.
+                    {getTranslation(globalLang, "counter_records_desc", "Visual anomalies logged securely dynamically spanning shipping lanes and fragile reef zones.")}
                   </p>
                 </div>
 
                 <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-850 text-left space-y-2 hover:border-slate-800 transition">
-                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">Critical Active Alerts</span>
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">{getTranslation(globalLang, "counter_stations_title", "Telemetry Buoy Nodes")}</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-extrabold font-heading text-orange-400">28</span>
                     <span className="text-xs text-orange-400 font-bold font-mono">Broadcasting Zones</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Emergency marine alerts monitored by authority operators to coordinate vessels safety protocol.
+                    {getTranslation(globalLang, "counter_stations_desc", "Emergency marine alerts monitored by authority operators to coordinate vessels safety protocol.")}
                   </p>
                 </div>
 
                 <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-850 text-left space-y-2 hover:border-slate-800 transition">
-                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">Marine Verification Rate</span>
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider font-bold block">{getTranslation(globalLang, "counter_analysed_title", "AI Analysed Plumes")}</span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-extrabold font-heading text-emerald-400">{verifiedPercentage}%</span>
                     <span className="text-xs text-emerald-400 font-bold font-mono">Expert Verification</span>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Reports verified by coast guard command and academic scientists to preserve marine biosafety.
+                    {getTranslation(globalLang, "counter_analysed_desc", "Reports verified by coast guard command and academic scientists to preserve marine biosafety.")}
                   </p>
                 </div>
 
@@ -1448,6 +1442,7 @@ export default function App() {
                 currentUser={sessionUser} 
                 onNavigate={setActiveTab}
                 onDeleteReport={handleDeleteReport}
+                globalLang={globalLang}
               />
             )}
             
@@ -1456,6 +1451,7 @@ export default function App() {
                 reports={reports} 
                 alerts={alerts} 
                 onNavigate={setActiveTab}
+                globalLang={globalLang}
               />
             )}
 
@@ -1464,6 +1460,7 @@ export default function App() {
                 reports={reports} 
                 alerts={alerts} 
                 onNavigate={setActiveTab}
+                globalLang={globalLang}
               />
             )}
 
@@ -1473,6 +1470,7 @@ export default function App() {
                 alerts={alerts} 
                 onNavigate={setActiveTab}
                 onUpdateReportStatus={handleUpdateReportStatus}
+                globalLang={globalLang}
               />
             )}
 
@@ -1482,6 +1480,7 @@ export default function App() {
                 alerts={alerts} 
                 currentUser={sessionUser} 
                 onNavigate={setActiveTab}
+                globalLang={globalLang}
               />
             )}
 
@@ -1578,10 +1577,13 @@ export default function App() {
                 </div>
               </div>
             ) : (
-                <AuthScreen onLogin={(user) => {
-                  handleLogin(user);
-                  setActiveTab("dashboard");
-                }} />
+                <AuthScreen 
+                  lang={globalLang}
+                  onLogin={(user) => {
+                    handleLogin(user);
+                    setActiveTab("dashboard");
+                  }} 
+                />
             )}
           </div>
         )}
@@ -1589,7 +1591,7 @@ export default function App() {
         {/* =============== T10: CITIZEN REPORT HISTORY & SYSTEM PROFILE =============== */}
         {activeTab === "profile" && (
           <div className="space-y-4" id="profile-page-root">
-            <UsersAdminPanel currentRole={sessionUser ? sessionUser.role : "Citizen"} onUpdateRole={(role) => {
+            <UsersAdminPanel lang={globalLang} currentRole={sessionUser ? sessionUser.role : "Citizen"} onUpdateRole={(role) => {
               if (sessionUser) {
                 const updated = { ...sessionUser, role };
                 handleLogin(updated);
@@ -1608,28 +1610,28 @@ export default function App() {
                     <div>
                       <h3 className="font-bold text-slate-100 font-heading text-lg uppercase flex items-center gap-2">
                         <AlertTriangle className="w-5 h-5 text-rose-500 animate-pulse" />
-                        <span>Active Coastal Siren Broadcasts</span>
+                        <span>{getTranslation(globalLang, "active_siren_broadcasts", "Active Coastal Siren Broadcasts")}</span>
                       </h3>
-                      <p className="text-xs text-slate-405">Review certified hazards or draft official notifications to active seafaring vessel grids.</p>
+                      <p className="text-xs text-slate-405">{getTranslation(globalLang, "siren_subtitle", "Review certified hazards or draft official notifications to active seafaring vessel grids.")}</p>
                     </div>
                   </div>
 
                   {/* If user is Admin or Authority, show authority alert generator widget */}
                   {sessionUser && (sessionUser.role === "Admin" || sessionUser.role === "Authority") && (
                     <div className="bg-slate-955 p-4 rounded-xl border border-dashed border-slate-800 space-y-4">
-                      <span className="text-[10px] font-mono text-cyan-405 uppercase font-bold tracking-wider block">Draft Official Siren Transmission</span>
+                      <span className="text-[10px] font-mono text-cyan-405 uppercase font-bold tracking-wider block">{getTranslation(globalLang, "draft_siren_transmission", "Draft Official Siren Transmission")}</span>
                       
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <input 
                           type="text" 
                           id="alert-title-input"
-                          placeholder="Transmission Title (e.g., Extreme Tide Turbulence)" 
+                          placeholder={getTranslation(globalLang, "alert_title_placeholder", "Transmission Title (e.g., Extreme Tide Turbulence)")} 
                           className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs text-slate-100 outline-none"
                         />
                         <input 
                           type="text" 
                           id="alert-location-input"
-                          placeholder="Affected Coordinate Quadrant/Centroid" 
+                          placeholder={getTranslation(globalLang, "affected_coords_placeholder", "Affected Coordinate Quadrant/Centroid")} 
                           className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs text-slate-100 outline-none"
                         />
                         <button 
@@ -1655,7 +1657,7 @@ export default function App() {
                           }}
                           className="bg-cyan-500 hover:bg-cyan-600 font-mono font-bold text-[10px] text-slate-950 rounded-lg p-2 transition cursor-pointer select-none"
                         >
-                          BROADCAST TRANSMISSION
+                          {getTranslation(globalLang, "broadcast_transmission", "BROADCAST TRANSMISSION")}
                         </button>
                       </div>
                     </div>
@@ -1667,7 +1669,7 @@ export default function App() {
                       <div key={a.id} className="bg-slate-955 p-4 rounded-xl border border-red-500/10 hover:border-red-500/20 transition space-y-2 relative">
                         <div className="flex items-center justify-between text-[10px] font-mono">
                           <span className="text-red-400 uppercase font-bold">{a.severity} WARNING</span>
-                          <span className="text-slate-500">{new Date(a.issuedAt).toLocaleDateString()}</span>
+                          <span className="text-slate-500">{formatDateUTC(a.issuedAt)}</span>
                         </div>
                         <h4 className="text-sm font-bold text-slate-100">{a.title}</h4>
                         <p className="text-xs text-slate-400">{a.description}</p>
@@ -1694,7 +1696,7 @@ export default function App() {
         {/* =============== T12: VOYAGER SAFE ZONES CORRIDOR PANEL =============== */}
         {activeTab === "safezones" && (
           <div className="space-y-4" id="safezones-page-root">
-            <SafeZonesPanel reports={reports} />
+            <SafeZonesPanel reports={reports} globalLang={globalLang} />
           </div>
         )}
 
@@ -1754,14 +1756,14 @@ export default function App() {
         {/* =============== T14: SCIENTIFIC EXPORT TOOL =============== */}
         {activeTab === "export" && (
           <div className="space-y-4" id="export-page-root">
-            <ExportDataPanel reports={reports} />
+            <ExportDataPanel reports={reports} globalLang={globalLang} />
           </div>
         )}
 
         {/* =============== T15: ACADEMIC BULLET DIAGNOSTIC INSIGHTS =============== */}
         {activeTab === "insights" && (
           <div className="space-y-4" id="insights-page-root">
-            <InsightsPanel />
+            <InsightsPanel globalLang={globalLang} />
           </div>
         )}
 
@@ -1826,7 +1828,7 @@ export default function App() {
         {/* =============== T17: USER IDENTITY DIRECT DIGITAL CLEARANCES =============== */}
         {activeTab === "users" && (
           <div className="space-y-4" id="users-page-root">
-            <UsersAdminPanel currentRole={sessionUser ? sessionUser.role : "Citizen"} onUpdateRole={(role) => {
+            <UsersAdminPanel lang={globalLang} currentRole={sessionUser ? sessionUser.role : "Citizen"} onUpdateRole={(role) => {
               if (sessionUser) {
                 const updated = { ...sessionUser, role };
                 handleLogin(updated);
@@ -1866,6 +1868,7 @@ export default function App() {
               onAddReport={handleAddReport}
               selectedCoords={selectedCoords}
               onClearCoords={() => setSelectedCoords(null)}
+              globalLang={globalLang}
             />
           </div>
         )}
@@ -1877,14 +1880,14 @@ export default function App() {
               <div>
                 <h3 className="font-bold text-slate-100 font-heading text-lg uppercase flex items-center gap-2">
                   <Compass className="w-5 h-5 text-cyan-400 animate-spin" style={{ animationDuration: "35s" }} />
-                  <span>INTEGRATED GEOSPATIAL OCEAN LAYER MAP</span>
+                  <span>{getTranslation(globalLang, "title_ocean_map", "INTEGRATED GEOSPATIAL OCEAN LAYER MAP")}</span>
                 </h3>
-                <p className="text-xs text-slate-400">Tactical GIS Coordinate Plotting & Incident Location Vector Sweep</p>
+                <p className="text-xs text-slate-400">{getTranslation(globalLang, "desc_ocean_map", "Tactical GIS Coordinate Plotting & Incident Location Vector Sweep")}</p>
               </div>
 
               {/* Map instructions metadata */}
-              <div className="bg-slate-950 px-4 py-2 border border-slate-800 text-[11px] font-mono rounded-xl text-slate-350">
-                🔴 CRITICAL THREATS // 🟡 ELEVATED // 🟢 MUTED RISK // CODE RATINGS ON BOARD
+              <div className="bg-slate-955 px-4 py-2 border border-slate-800 text-[11px] font-mono rounded-xl text-slate-350">
+                🔴 {getTranslation(globalLang, "map_critical", "CRITICAL THREATS")} // 🟡 {getTranslation(globalLang, "map_elevated", "ELEVATED")} // 🟢 {getTranslation(globalLang, "map_muted", "MUTED RISK")} // {getTranslation(globalLang, "map_ratings", "CODE RATINGS ON BOARD")}
               </div>
             </div>
 
@@ -1894,12 +1897,13 @@ export default function App() {
                 selectedReportId={selectedReportId}
                 onSelectReport={setSelectedReportId}
                 onSelectCoordinates={handleSelectCoordinatesOnMap}
+                globalLang={globalLang}
               />
 
               {/* Dynamic GIS Map Legend Overlay */}
               <div className="absolute bottom-4 left-4 bg-slate-950/95 border border-slate-800 rounded-xl p-3.5 shadow-2xl z-10 max-w-[240px] backdrop-blur-md">
                 <span className="text-[10px] font-mono text-cyan-400 font-extrabold tracking-widest block uppercase mb-2">
-                  GIS LAYER LEGEND
+                  {getTranslation(globalLang, "legend_title", "GIS LAYER LEGEND")}
                 </span>
                 <div className="space-y-1.5">
                   {[
@@ -2100,7 +2104,7 @@ export default function App() {
         {/* =============== EXPERT INTERCONNECTED MULTI-CORE WORKSPACES (FROM USER IMAGES) =============== */}
         {activeTab === "expert_gis" && (
           <div id="expert-gis-root" className="animate-fadeIn">
-            <IntegratedWorkspaces />
+            <IntegratedWorkspaces globalLang={globalLang} />
           </div>
         )}
 
@@ -2115,6 +2119,7 @@ export default function App() {
           selectedReportId={selectedReportId}
           onSelectReportId={setSelectedReportId}
           onNavigateTab={setActiveTab}
+          lang={globalLang}
         />
       )}
 

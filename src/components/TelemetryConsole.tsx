@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { HazardReport, UserRole } from "../types";
+import { getTranslation } from "../utils/translations";
 import { 
   Wifi, 
   WifiOff, 
@@ -28,6 +29,7 @@ interface TelemetryConsoleProps {
   selectedReportId: string | null;
   onSelectReportId: (id: string | null) => void;
   onNavigateTab: (tab: string) => void;
+  lang?: string;
 }
 
 // Preset critical hazards representing incoming simulated satellite or emergency fleet reports
@@ -84,7 +86,8 @@ export default function TelemetryConsole({
   onUpdateReportStatus,
   selectedReportId,
   onSelectReportId,
-  onNavigateTab
+  onNavigateTab,
+  lang = "English"
 }: TelemetryConsoleProps) {
   // Transceiver state
   const [isOpen, setIsOpen] = useState(false);
@@ -106,6 +109,13 @@ export default function TelemetryConsole({
   // Watcher ref to prevent double toast alerts for the same ID
   const toastedIdsRef = useRef<Set<string>>(new Set());
   const prevReportsLengthRef = useRef<number>(reports.length);
+
+  // Pre-populate toastedIdsRef on initial mount with current report IDs
+  useEffect(() => {
+    reports.forEach((r) => {
+      toastedIdsRef.current.add(r.id);
+    });
+  }, []);
 
   // Play a sweet, harmonious dual-bell chime using native HTML5 Audio Synthesis
   const playWarningSynth = () => {
@@ -253,18 +263,18 @@ export default function TelemetryConsole({
     };
   }, [isSimulatingFeed, streamMode, pollingRateSeconds]);
 
-  // SYSTEM CENTRALIZED MONITOR: Watches BOTH real and simulated added reports for 'Critical' severity
+  // SYSTEM CENTRALIZED MONITOR: Watches BOTH real and simulated added reports for any severity
   useEffect(() => {
     // If reports array grows or changes
     if (reports.length > 0) {
-      // Find all Critical reports that haven't been toasted yet
-      const unToastedCriticals = reports.filter(
-        r => r.severity === "Critical" && !toastedIdsRef.current.has(r.id)
+      // Find all reports that haven't been toasted yet
+      const unToasted = reports.filter(
+        r => !toastedIdsRef.current.has(r.id)
       );
 
-      if (unToastedCriticals.length > 0) {
-        // We have newly created critical records! Create beautiful toasts for them
-        const newToastsToAdd = unToastedCriticals.map(report => {
+      if (unToasted.length > 0) {
+        // We have newly created records! Create beautiful toasts for them
+        const newToastsToAdd = unToasted.map(report => {
           // Add to our globally tracked Set to prevent duplicate rendering
           toastedIdsRef.current.add(report.id);
           
@@ -292,8 +302,22 @@ export default function TelemetryConsole({
         playWarningSynth();
 
         // Print to log screen
-        unToastedCriticals.forEach(cf => {
-          addLog("OVERWATCH", `🚨 EMERGENCY THREAT BROADCAST: "${cf.title}" is now active in active coordinates!`, "error");
+        unToasted.forEach(cf => {
+          const prefix = cf.severity === "Critical" 
+            ? "🚨 EMERGENCY THREAT" 
+            : cf.severity === "High"
+            ? "⚠️ HIGH HAZARD" 
+            : cf.severity === "Medium"
+            ? "⚡ MEDIUM HAZARD" 
+            : "ℹ️ LOW HAZARD";
+          const logType = cf.severity === "Critical" 
+            ? "error" 
+            : cf.severity === "High"
+            ? "warning" 
+            : cf.severity === "Medium"
+            ? "info" 
+            : "success";
+          addLog("OVERWATCH", `${prefix} REVEALED: "${cf.title}" in coordinates (${cf.latitude}, ${cf.longitude})`, logType);
         });
       }
     }
@@ -365,6 +389,48 @@ export default function TelemetryConsole({
             const r = toast.report;
             const categoryLabel = r.category.split("_").map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
             
+            // Dynamic theme configuration based on report severity
+            const severityThemes = {
+              Critical: {
+                border: "border-red-500/30 dark:border-red-500/45",
+                banner: "from-red-600 via-red-500 to-amber-600",
+                pulse: "bg-red-500",
+                badgeBg: "bg-red-500/10 border-red-500/30 text-red-400",
+                text: "text-red-400 animate-pulse",
+                header: "🚨 LIVE CRITICAL HAZARD LOGGED",
+                categoryBadge: "bg-red-500/10 border-red-500/20 text-red-300",
+              },
+              High: {
+                border: "border-amber-500/30 dark:border-amber-500/45",
+                banner: "from-amber-600 via-amber-500 to-yellow-500",
+                pulse: "bg-amber-500",
+                badgeBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+                text: "text-amber-400",
+                header: "⚠️ LIVE HIGH HAZARD LOGGED",
+                categoryBadge: "bg-amber-500/10 border-amber-500/20 text-amber-300",
+              },
+              Medium: {
+                border: "border-cyan-500/30 dark:border-cyan-500/45",
+                banner: "from-cyan-600 via-cyan-500 to-blue-600",
+                pulse: "bg-cyan-500",
+                badgeBg: "bg-cyan-500/10 border-cyan-500/30 text-cyan-400",
+                text: "text-cyan-400",
+                header: "⚡ LIVE MEDIUM HAZARD LOGGED",
+                categoryBadge: "bg-cyan-500/10 border-cyan-500/20 text-cyan-300",
+              },
+              Low: {
+                border: "border-emerald-500/30 dark:border-emerald-500/45",
+                banner: "from-emerald-600 via-emerald-500 to-teal-500",
+                pulse: "bg-emerald-500",
+                badgeBg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
+                text: "text-emerald-400",
+                header: "ℹ️ LIVE LOW HAZARD LOGGED",
+                categoryBadge: "bg-emerald-500/10 border-emerald-500/20 text-emerald-300",
+              }
+            };
+
+            const theme = severityThemes[r.severity] || severityThemes.Medium;
+            
             return (
               <motion.div
                 key={toast.id}
@@ -372,30 +438,30 @@ export default function TelemetryConsole({
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 100, scale: 0.95, y: -15 }}
                 transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                className="bg-slate-930/98 backdrop-blur-md rounded-2xl border border-red-500/30 dark:border-red-500/45 shadow-2xl overflow-hidden text-left flex flex-col pointer-events-auto h-auto relative"
+                className={`bg-slate-930/98 backdrop-blur-md rounded-2xl border ${theme.border} shadow-2xl overflow-hidden text-left flex flex-col pointer-events-auto h-auto relative`}
               >
-                {/* Visual red hazard banner */}
-                <div className="bg-gradient-to-r from-red-600 via-red-500 to-amber-600 h-1.5 w-full shrink-0 relative">
-                  <span className="absolute inset-0 bg-red-500 animate-pulse" />
+                {/* Visual colored hazard banner */}
+                <div className={`bg-gradient-to-r ${theme.banner} h-1.5 w-full shrink-0 relative`}>
+                  <span className={`absolute inset-0 ${theme.pulse} animate-pulse`} />
                 </div>
-
+ 
                 <div className="p-4 space-y-3">
                   {/* Headline Info */}
                   <div className="flex items-start justify-between gap-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-md bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                      <div className={`w-5 h-5 rounded-md ${theme.badgeBg} flex items-center justify-center`}>
                         <AlertTriangle className="w-3.5 h-3.5 animate-bounce" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-mono font-black text-red-400 leading-none tracking-wider uppercase">
-                          🚨 LIVE {r.severity.toUpperCase()} HAZARD LOGGED
+                        <span className={`text-[10px] font-mono font-black ${theme.text} leading-none tracking-wider uppercase`}>
+                          {theme.header}
                         </span>
                         <span className="text-[9px] font-mono text-slate-500 leading-none mt-0.5">
                           via {toast.provider} Stream • {new Date(r.reportedAt).toLocaleTimeString()}
                         </span>
                       </div>
                     </div>
-
+ 
                     <button
                       onClick={() => handleDismissToast(toast.id)}
                       className="p-1 text-slate-550 hover:text-slate-350 hover:bg-slate-850/50 rounded-lg transition-colors cursor-pointer"
@@ -404,7 +470,7 @@ export default function TelemetryConsole({
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
-
+ 
                   {/* Body Content */}
                   <div className="space-y-1.5 text-left">
                     <h4 className="text-[12.5px] font-extrabold text-slate-100 tracking-tight leading-snug">
@@ -414,10 +480,10 @@ export default function TelemetryConsole({
                       {r.description}
                     </p>
                   </div>
-
+ 
                   {/* Grid geographical coordinate tag / category */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 text-red-300 font-mono font-bold text-[9px] rounded uppercase">
+                    <span className={`px-2 py-0.5 ${theme.categoryBadge} font-mono font-bold text-[9px] rounded uppercase`}>
                       {categoryLabel}
                     </span>
                     <span className="px-2 py-0.5 bg-slate-900 border border-slate-850 text-slate-450 font-mono text-[9px] rounded flex items-center gap-1">
@@ -436,7 +502,7 @@ export default function TelemetryConsole({
                       className="px-2.5 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 rounded-lg font-bold text-[10.5px] tracking-wide transition cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <Compass className="w-3 h-3 text-cyan-400" />
-                      <span>Inspect Map</span>
+                      <span>{getTranslation(lang, "btn_inspect_map", "Inspect Map")}</span>
                     </button>
 
                     <button
@@ -448,7 +514,7 @@ export default function TelemetryConsole({
                       className="px-2.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg font-bold text-[10.5px] tracking-wide transition cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <Check className="w-3 h-3 text-emerald-400" />
-                      <span>HQ Verify</span>
+                      <span>{getTranslation(lang, "btn_hq_verify", "HQ Verify")}</span>
                     </button>
                   </div>
                 </div>

@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { User, UserRole } from "../types";
-import { User as UserIcon, Lock, Mail, Facebook, Twitter, Shield, Heart, HelpCircle, Check, Compass } from "lucide-react";
+import { User as UserIcon, Lock, Mail, Facebook, Twitter, Compass } from "lucide-react";
+import { getTranslation } from "../utils/translations";
 
 interface AuthScreenProps {
   onLogin: (user: User) => void;
+  lang?: string;
 }
 
-export default function AuthScreen({ onLogin }: AuthScreenProps) {
+export default function AuthScreen({ onLogin, lang = "English" }: AuthScreenProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<UserRole>("Citizen");
@@ -49,7 +51,6 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
   const handleQuickOAuthPreset = (presetRole: UserRole, providerName: string) => {
     if (!agreeTerms) {
       setFormError("You must check the 'terms and conditions' box down below before using social Quick-Log.");
-      // Auto blink-focus or highlight agreeable checkbox
       return;
     }
 
@@ -107,15 +108,15 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
   const getRoleDescription = (selectedRole: UserRole) => {
     switch (selectedRole) {
       case "Citizen":
-        return "Report seaside plastics, reef health, and general weather anomalies on our shared map.";
+        return getTranslation(lang, "desc_citizen", "Report seaside plastics, reef health, and general weather anomalies on our shared map.");
       case "Fisherman":
-        return "Access drift directions, SST waves, red tide warnings, and direct boat-safe dispatches.";
+        return getTranslation(lang, "desc_fisherman", "Access drift directions, SST waves, red tide warnings, and direct boat-safe dispatches.");
       case "Researcher":
-        return "Inspect water temperatures,Coral bleaching zones, log raw data, and scientific insights.";
+        return getTranslation(lang, "desc_researcher", "Inspect water temperatures, Coral bleaching zones, log raw data, and scientific insights.");
       case "Authority":
-        return "Review active citizen hazard logs, authorize clean-up ships, and issue immediate emergency alerts.";
+        return getTranslation(lang, "desc_authority", "Review active citizen hazard logs, authorize clean-up ships, and issue immediate emergency alerts.");
       case "Admin":
-        return "Full operational access. Override telemetry logs, seed simulations, change roles, and system config.";
+        return getTranslation(lang, "desc_admin", "Full operational access. Override telemetry logs, seed simulations, change roles, and system config.");
     }
   };
 
@@ -173,10 +174,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             </div>
 
             <h2 className="text-3xl md:text-4xl font-extrabold text-[#ff7a70] tracking-tight mb-2">
-              Member Login
+              {getTranslation(lang, "member_login", "Member Login")}
             </h2>
             <p className="text-xs text-slate-400">
-              Please fill in your basic info to authenticate telemetry link
+              {getTranslation(lang, "login_subtitle", "Please fill in your basic info to authenticate telemetry link")}
             </p>
           </div>
 
@@ -196,7 +197,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Operator Full Name"
+                placeholder={getTranslation(lang, "placeholder_name", "Operator Full Name")}
                 className="w-full bg-slate-950/40 border border-slate-800 rounded-3xl pl-10 pr-4 py-3 text-xs text-slate-200 placeholder-slate-500 outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 transition-all font-medium"
                 required
               />
@@ -211,7 +212,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Security Email Coordinates"
+                placeholder={getTranslation(lang, "placeholder_email", "Security Email Coordinates")}
                 className="w-full bg-slate-950/40 border border-slate-800 rounded-3xl pl-10 pr-4 py-3 text-xs text-slate-200 placeholder-slate-500 outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 transition-all font-medium"
                 required
               />
@@ -226,7 +227,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                 type="text"
                 value={organization}
                 onChange={(e) => setOrganization(e.target.value)}
-                placeholder="Organization or Vessel Code (Optional)"
+                placeholder={getTranslation(lang, "placeholder_org", "Organization or Vessel Code (Optional)")}
                 className="w-full bg-slate-950/40 border border-slate-800 rounded-3xl pl-10 pr-4 py-3 text-xs text-slate-200 placeholder-slate-500 outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/40 transition-all font-medium"
               />
             </div>
@@ -234,7 +235,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             {/* Clearance Level Selection dropdown */}
             <div className="space-y-1.5 text-left pt-1">
               <label className="text-[10px] font-mono font-bold tracking-wider text-slate-505 block pl-1 uppercase">
-                Access Level Clearance:
+                {getTranslation(lang, "access_level", "Access Level Clearance:")}
               </label>
               <select
                 value={role}
@@ -259,7 +260,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
               type="submit"
               className="w-full mt-4 bg-gradient-to-r from-[#ff7a70] to-[#55efc4] hover:opacity-95 active:scale-[0.98] text-slate-950 font-black tracking-widest text-xs uppercase py-3.5 px-6 rounded-full transition shadow-lg cursor-pointer transform"
             >
-              LOGIN
+              {getTranslation(lang, "btn_login", "LOGIN")}
             </button>
           </form>
 
@@ -300,7 +301,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             {/* Quick-Preset OAuth Buttons Section corresponding to mockup's Social Account circles */}
             <div className="space-y-5">
               <span className="text-[10px] font-mono font-bold tracking-widest text-[#ff7a70] uppercase block">
-                QUICK-LOG PRESETS (OAUTH COOPERATIVE)
+                {getTranslation(lang, "or_social", "QUICK-LOG PRESETS (OAUTH COOPERATIVE)")}
               </span>
 
               <div className="flex justify-center items-center gap-6">
@@ -357,7 +358,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
                   className="rounded border-slate-800 text-[#ff7a70] bg-slate-900 focus:ring-0 focus:ring-offset-0 cursor-pointer w-4 h-4"
                   id="agree-checkbox"
                 />
-                <span>By signing up I agree with <strong className="text-[#ff7a70] hover:underline">terms and conditions</strong></span>
+                <span>{getTranslation(lang, "agree_terms", "By signing up I agree with terms and conditions")}</span>
               </label>
             </div>
           </div>
@@ -373,7 +374,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
               }}
               className="text-xs text-slate-400 hover:text-cyan-400 font-bold underline transition cursor-pointer"
             >
-              Quick prefill credentials on left
+              {getTranslation(lang, "active_credentials", "Quick prefill credentials on left")}
             </button>
           </div>
         </div>

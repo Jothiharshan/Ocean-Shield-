@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { HazardReport, HazardCategory } from "../types";
 import { MAP_GRID_CELLS } from "../mockData";
 import { Ship, ShieldAlert, Compass, Eye, Filter, Wind, Navigation2, Check } from "lucide-react";
+import { getTranslation } from "../utils/translations";
 
 interface MarineGISMapProps {
   reports: HazardReport[];
   selectedReportId: string | null;
   onSelectReport: (id: string | null) => void;
   onSelectCoordinates: (lat: number, lng: number, locationName: string) => void;
+  globalLang?: string;
 }
 
 export default function MarineGISMap({
@@ -15,7 +17,9 @@ export default function MarineGISMap({
   selectedReportId,
   onSelectReport,
   onSelectCoordinates,
+  globalLang,
 }: MarineGISMapProps) {
+  const lang = globalLang || "English";
   // Map dimensions relative to our coordinate system (represented as 0 to 600 width, 0 to 450 height)
   // Grid coordinates map from latitude (14.45N to 14.75N) and longitude (120.05E to 120.50E)
   const latMin = 14.45;
@@ -136,7 +140,7 @@ export default function MarineGISMap({
           <Compass className="w-5 h-5 text-teal-400 animate-spin" style={{ animationDuration: "14s" }} />
           <div>
             <h3 className="text-sm font-semibold text-slate-100 tracking-tight font-sans">
-              ACTIVE MARINE GIS OVERLAY
+              {getTranslation(lang, "active_gis_overlay", "ACTIVE MARINE GIS OVERLAY")}
             </h3>
             <p className="text-xs text-slate-400">
               {hoverCoords ? (
@@ -144,7 +148,7 @@ export default function MarineGISMap({
                   LAT: {hoverCoords.lat.toFixed(4)}°N | LNG: {hoverCoords.lng.toFixed(4)}°E
                 </span>
               ) : (
-                "Hover cursor for telemetry"
+                getTranslation(lang, "hover_for_telemetry", "Hover cursor for telemetry")
               )}
             </p>
           </div>
@@ -160,13 +164,13 @@ export default function MarineGISMap({
               className="bg-transparent text-slate-200 outline-none border-none pr-1 cursor-pointer font-sans"
               id="map-filter-category"
             >
-              <option value="all">All Incidents</option>
-              <option value="oil_spill">Oil Spills</option>
-              <option value="coral_bleaching">Coral Bleaching</option>
-              <option value="illegal_fishing">Illegal Fishing</option>
-              <option value="severe_weather">Severe Weather</option>
-              <option value="toxic_algae">Algal Bloom</option>
-              <option value="marine_debris">Marine Debris</option>
+              <option value="all">{getTranslation(lang, "all_incidents", "All Incidents")}</option>
+              <option value="oil_spill">{getTranslation(lang, "oil_spills", "Oil Spills")}</option>
+              <option value="coral_bleaching">{getTranslation(lang, "coral_bleaching_opt", "Coral Bleaching")}</option>
+              <option value="illegal_fishing">{getTranslation(lang, "illegal_fishing_opt", "Illegal Fishing")}</option>
+              <option value="severe_weather">{getTranslation(lang, "severe_weather_opt", "Severe Weather")}</option>
+              <option value="toxic_algae">{getTranslation(lang, "algal_bloom_opt", "Algal Bloom")}</option>
+              <option value="marine_debris">{getTranslation(lang, "marine_debris_opt", "Marine Debris")}</option>
             </select>
           </div>
 
@@ -177,11 +181,11 @@ export default function MarineGISMap({
               className="bg-transparent text-slate-200 outline-none border-none pr-1 cursor-pointer font-sans"
               id="map-filter-severity"
             >
-              <option value="all">All Severities</option>
-              <option value="Critical">Critical Only</option>
-              <option value="High">High Severity</option>
-              <option value="Medium">Medium Severity</option>
-              <option value="Low">Low Severity</option>
+              <option value="all">{getTranslation(lang, "all_severities", "All Severities")}</option>
+              <option value="Critical">{getTranslation(lang, "critical_only", "Critical Only")}</option>
+              <option value="High">{getTranslation(lang, "high_severity", "High Severity")}</option>
+              <option value="Medium">{getTranslation(lang, "medium_severity", "Medium Severity")}</option>
+              <option value="Low">{getTranslation(lang, "low_severity", "Low Severity")}</option>
             </select>
           </div>
 
@@ -703,10 +707,10 @@ export default function MarineGISMap({
                 style={{ backgroundColor: cell.color.replace("0.1", "0.8") }}
               />
             </div>
-            <p className="font-semibold text-slate-300 mt-0.5 pointer-events-none truncate">{cell.label}</p>
+            <p className="font-semibold text-slate-300 mt-0.5 pointer-events-none truncate">{getTranslation(lang, `cell_${cell.id}_label`, cell.label)}</p>
             {selectedGridCell === cell.id && (
               <p className="text-[10px] text-slate-400 mt-1 line-clamp-2 transition animate-in fade-in duration-200">
-                {cell.description}
+                {getTranslation(lang, `cell_${cell.id}_desc`, cell.description)}
               </p>
             )}
           </div>

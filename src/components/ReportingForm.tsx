@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { HazardCategory, SeverityLevel, HazardReport, UserRole } from "../types";
 import { ShieldAlert, MapPin, Send, Globe, Sparkles, Trash, Eye, CheckCircle, FileText, Upload, Mic, MicOff, Navigation, Image as ImageIcon, Loader } from "lucide-react";
 
+import { getTranslation } from "../utils/translations";
+
 interface ReportingFormProps {
   currentUserRole: UserRole;
   currentUserId: string;
@@ -9,6 +11,7 @@ interface ReportingFormProps {
   onAddReport: (report: HazardReport) => void;
   selectedCoords: { lat: number; lng: number; locationName: string } | null;
   onClearCoords: () => void;
+  globalLang?: string;
 }
 
 export default function ReportingForm({
@@ -18,7 +21,9 @@ export default function ReportingForm({
   onAddReport,
   selectedCoords,
   onClearCoords,
+  globalLang,
 }: ReportingFormProps) {
+  const lang = globalLang || "English";
   // Main state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<HazardCategory>("oil_spill");
@@ -292,11 +297,38 @@ export default function ReportingForm({
     }, 1000);
   };
 
-  // Phase 4 GPS simulator
-  const handleSimulateGPS = () => {
+  // GPS locator utilizing actual navigator.geolocation with high-fidelity backup
+  const handleAcquireGPS = (isOnLoad = false) => {
     setIsFindingGps(true);
-    setTimeout(() => {
-      // Simulate locking Manila bay or marine flat coordinate bounds
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = parseFloat(position.coords.latitude.toFixed(4));
+          const lng = parseFloat(position.coords.longitude.toFixed(4));
+          setLatitude(lat);
+          setLongitude(lng);
+          
+          // Use real coords. Attempt simple mock-reverse-geocode description
+          setLocationName(`My Current GPS Location (${lat}, ${lng})`);
+          setIsFindingGps(false);
+          console.log("Real GPS coordinate lock successful:", lat, lng);
+        },
+        (error) => {
+          console.warn("Browser geolocation blocked or failed, using satellite simulated backup coordinates:", error.message);
+          // Fallback to high-fidelity mock bounds
+          const fixedLats = [14.489, 14.512, 14.398, 14.620];
+          const fixedLngs = [120.252, 120.301, 120.412, 120.198];
+          const randIdx = Math.floor(Math.random() * fixedLats.length);
+          
+          setLatitude(fixedLats[randIdx]);
+          setLongitude(fixedLngs[randIdx]);
+          setLocationName(`Sector B-${randIdx + 1}`);
+          setIsFindingGps(false);
+        },
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+      );
+    } else {
+      // Geolocation API not supported
       const fixedLats = [14.489, 14.512, 14.398, 14.620];
       const fixedLngs = [120.252, 120.301, 120.412, 120.198];
       const randIdx = Math.floor(Math.random() * fixedLats.length);
@@ -305,8 +337,19 @@ export default function ReportingForm({
       setLongitude(fixedLngs[randIdx]);
       setLocationName(`Sector B-${randIdx + 1}`);
       setIsFindingGps(false);
-    }, 1200);
+    }
   };
+
+  const handleSimulateGPS = () => {
+    handleAcquireGPS(false);
+  };
+
+  // Auto-acquire current location on component load
+  useEffect(() => {
+    if (!selectedCoords) {
+      handleAcquireGPS(true);
+    }
+  }, []);
 
   // Phase 4 Voice dictation simulator
   const handleSimulateVoice = () => {
@@ -566,7 +609,7 @@ export default function ReportingForm({
               <ShieldAlert className="w-5.5 h-5.5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-base text-slate-100 font-heading">DISPATCH PORTAL RECORD</h3>
+              <h3 className="font-extrabold text-base text-slate-100 font-heading">{getTranslation(lang, "dispatch_portal_record", "DISPATCH PORTAL RECORD")}</h3>
               <p className="text-xs text-slate-400">Operator Session: <span className="text-cyan-400 font-semibold">{currentUserName}</span> ({currentUserRole})</p>
             </div>
           </div>
@@ -579,7 +622,7 @@ export default function ReportingForm({
             className="flex items-center gap-1.5 bg-slate-950 border border-slate-800 hover:border-cyan-500/50 hover:text-cyan-400 px-3 py-1.5 rounded-xl text-[10.5px] font-mono font-bold text-slate-350 transition cursor-pointer select-none"
           >
             {isFindingGps ? <Loader className="w-3.5 h-3.5 animate-spin text-cyan-400" /> : <Navigation className="w-3.5 h-3.5" />}
-            <span>{isFindingGps ? "LOCATING..." : "GPS LOCK AUTOFILL"}</span>
+            <span>{isFindingGps ? getTranslation(lang, "locating", "LOCATING...") : getTranslation(lang, "gps_lock_autofill", "GPS LOCK AUTOFILL")}</span>
           </button>
         </div>
 
@@ -589,7 +632,7 @@ export default function ReportingForm({
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${isOfflineMode ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
               <span className="text-[10px] font-bold text-slate-350 uppercase font-mono tracking-wider">
-                Uplink: {isOfflineMode ? "OFFLINE BUFFER QUEUE RUNNING" : "ONLINE / SATELLITE ACTIVE"}
+                {getTranslation(lang, "uplink", "Uplink")}: {isOfflineMode ? getTranslation(lang, "offline_buffer_queue", "OFFLINE BUFFER QUEUE RUNNING") : getTranslation(lang, "online_satellite_active", "ONLINE / SATELLITE ACTIVE")}
               </span>
             </div>
             <button
@@ -604,7 +647,7 @@ export default function ReportingForm({
                   : "bg-slate-900 border-slate-800 text-slate-450 hover:text-slate-200"
               }`}
             >
-              Set {isOfflineMode ? "🟢 ONLINE" : "🟡 OFFLINE SIM"}
+              {getTranslation(lang, "set", "Set")} {isOfflineMode ? "🟢 ONLINE" : "🟡 OFFLINE SIM"}
             </button>
           </div>
 
@@ -644,7 +687,7 @@ export default function ReportingForm({
           {/* Title input */}
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
-              Incident Header / Title *
+              {getTranslation(lang, "incident_header_title", "Incident Header / Title *")}
             </label>
             <input
               type="text"
@@ -661,7 +704,7 @@ export default function ReportingForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
-                Hazard Classification
+                {getTranslation(lang, "hazard_classification", "Hazard Classification")}
               </label>
               <select
                 value={category}
@@ -669,18 +712,18 @@ export default function ReportingForm({
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
                 id="report-select-category"
               >
-                <option value="oil_spill">⚓ Oil / Diesel Spill</option>
-                <option value="coral_bleaching">🪸 Coral Bleaching Event</option>
-                <option value="illegal_fishing">🚢 Illegal Trawling / Fishing</option>
-                <option value="severe_weather">🌊 Storm Surge / Wind Anomaly</option>
-                <option value="toxic_algae">👾 Harmful Algal Bloom</option>
-                <option value="marine_debris">🕸️ Ghost Net / Debris Pile</option>
+                <option value="oil_spill">⚓ {getTranslation(lang, "cat_oil", "Oil / Diesel Spill")}</option>
+                <option value="coral_bleaching">🪸 {getTranslation(lang, "cat_coral", "Coral Bleaching Event")}</option>
+                <option value="illegal_fishing">🚢 {getTranslation(lang, "cat_fishing", "Illegal Trawling / Fishing")}</option>
+                <option value="severe_weather">🌊 {getTranslation(lang, "cat_weather", "Storm Surge / Wind Anomaly")}</option>
+                <option value="toxic_algae">👾 {getTranslation(lang, "cat_algae", "Harmful Algal Bloom")}</option>
+                <option value="marine_debris">🕸️ {getTranslation(lang, "cat_debris", "Ghost Net / Debris Pile")}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
-                Observed Threat Level
+                {getTranslation(lang, "observed_threat_level", "Observed Threat Level")}
               </label>
               <select
                 value={severity}
@@ -700,7 +743,7 @@ export default function ReportingForm({
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
-                Latitude (GPS)
+                {getTranslation(lang, "latitude_gps", "Latitude (GPS)")}
               </label>
               <input
                 type="number"
@@ -712,7 +755,7 @@ export default function ReportingForm({
             </div>
             <div>
               <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1 font-mono">
-                Longitude (GPS)
+                {getTranslation(lang, "longitude_gps", "Longitude (GPS)")}
               </label>
               <input
                 type="number"
@@ -724,7 +767,7 @@ export default function ReportingForm({
             </div>
             <div>
               <label className="block text-[9px] font-bold text-cyan-400 uppercase tracking-wider mb-1 font-mono">
-                Sector Location *
+                {getTranslation(lang, "sector_location", "Sector Location *")}
               </label>
               <input
                 type="text"
@@ -741,7 +784,7 @@ export default function ReportingForm({
           <div>
             <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                Tactical Sighting Intel *
+                {getTranslation(lang, "tactical_sighting_intel", "Tactical Sighting Intel *")}
               </label>
 
               <div className="flex items-center gap-1.5 text-[10px] text-slate-450 flex-wrap">
@@ -846,7 +889,7 @@ export default function ReportingForm({
           {/* INTERACTIVE FILE UPLOADER SIMULATOR (Phase 4) */}
           <div className="space-y-1.5">
             <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-              Evidence Attachments (Field Photo)
+              {getTranslation(lang, "evidence_attachments", "Evidence Attachments (Field Photo)")}
             </span>
 
             <div
@@ -911,7 +954,7 @@ export default function ReportingForm({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                Radar Contour Graphic (Map Plume / Draw Zone)
+                {getTranslation(lang, "radar_contour_graphic", "Radar Contour Graphic (Map Plume / Draw Zone)")}
               </label>
               {canvasImage && (
                 <button
@@ -953,7 +996,7 @@ export default function ReportingForm({
               }`}
             >
               <Sparkles className="w-4 h-4 animate-pulse text-emerald-400" />
-              {isAnalyzing ? "AI Pre-scanning..." : "Perform AI Integrity Check"}
+              {isAnalyzing ? getTranslation(lang, "btn_ai_scanning", "AI Pre-scanning...") : getTranslation(lang, "btn_ai_scan", "Perform AI Integrity Check")}
             </button>
 
             <button
@@ -962,7 +1005,7 @@ export default function ReportingForm({
               id="report-submit-btn"
             >
               <Send className="w-4 h-4" />
-              File Official Dispatch
+              {getTranslation(lang, "btn_file_dispatch", "File Official Dispatch")}
             </button>
           </div>
         </form>

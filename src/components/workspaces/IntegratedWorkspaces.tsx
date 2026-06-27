@@ -6,6 +6,7 @@ import {
   ChevronRight, AlertTriangle, Play, Pause, RefreshCw, BarChart2,
   FileText, Star, ArrowUpRight, CheckCircle2, ChevronDown, Check, Trash, ArrowLeft
 } from "lucide-react";
+import { getTranslation } from "../../utils/translations";
 
 // ======================== MOCK DATABASE FOR WORSPACES ========================
 
@@ -421,7 +422,8 @@ const getMeteorologicalDataForDay = (day: number) => {
   return data[day] || data[18];
 };
 
-export default function IntegratedWorkspaces() {
+export default function IntegratedWorkspaces({ globalLang }: { globalLang?: string }) {
+  const lang = globalLang || "English";
   const [activeWorkspace, setActiveWorkspace] = useState<string>("clear_seas");
   const [mobileShowDetail, setMobileShowDetail] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
@@ -608,15 +610,15 @@ export default function IntegratedWorkspaces() {
 
   // Render Sidebar Selector Cards with responsive thumbnails
   const workspacesList = [
-    { id: "clear_seas", title: "Clear Seas Incident Center", icon: Ship, spec: "Image 1 & 6", desc: "Marine occurrence tracking, study areas & vessel breakdown pie visualizer." },
-    { id: "coastal_inundation", title: "Coastal Inundation Watch", icon: WavesIcon, spec: "Image 2", desc: "Hurricane track cones of uncertainty, storm radii radar, and tidal hazard margins." },
-    { id: "sofar_spotter", title: "SOFAR Spotlight - Buoy", icon: Activity, spec: "Image 3", desc: "High-density wave sensors, spectral directionality, and barometric indices." },
-    { id: "flood_tags", title: "FloodTags Crowdsourced Map", icon: Layers, spec: "Image 4", desc: "Social monitoring clusters, localized overflow text feeds & photos log." },
-    { id: "quake_map", title: "Quakemap Action Grid", icon: Map, spec: "Image 5", desc: "Himalayan seismic emergency relief hub, demand tracking and pin overlays." },
-    { id: "met_disaster", title: "MetDisaster Radar Hub", icon: Calendar, spec: "Image 7", desc: "Weather forecasting schedule calendars, hourly service statuses & trendlines." },
-    { id: "apsdma_gis", title: "APSDMA GIS Decision System", icon: CloudLightning, spec: "Image 9", desc: "Multi-layered live vectors including reservoirs, lightning and tropical cyclone paths." },
-    { id: "deep_sea_fleet", title: "Deep Sea Fleet Cockpit", icon: TrendingUp, spec: "Image 10", desc: "Commercial yacht overconsumption analytics, smooth fuel curves and mechanical alerts." },
-    { id: "ocean_saas", title: "Ocean Enterprise Portal", icon: ArrowUpRight, spec: "Image 8", desc: "State-of-the-art SaaS product showcase with live carousel mockup headers." },
+    { id: "clear_seas", title: getTranslation(lang, "title_ws_clear_seas", "Clear Seas Incident Centre"), icon: Ship, spec: "Image 1 & 6", desc: getTranslation(lang, "desc_ws_clear_seas", "Marine occurrence tracking, study areas & vessel breakdown pie visualiser.") },
+    { id: "coastal_inundation", title: getTranslation(lang, "title_ws_coastal_inundation", "Coastal Inundation Watch"), icon: WavesIcon, spec: "Image 2", desc: getTranslation(lang, "desc_ws_coastal_inundation", "Hurricane track cones of uncertainty, storm radii radar, and tidal hazard margins.") },
+    { id: "sofar_spotter", title: getTranslation(lang, "title_ws_sofar_spotter", "SOFAR Spotlight - Buoy"), icon: Activity, spec: "Image 3", desc: getTranslation(lang, "desc_ws_sofar_spotter", "High-density wave sensors, spectral directionality, and barometric indices.") },
+    { id: "flood_tags", title: getTranslation(lang, "title_ws_flood_tags", "FloodTags Crowdsourced Map"), icon: Layers, spec: "Image 4", desc: getTranslation(lang, "desc_ws_flood_tags", "Social monitoring clusters, localised overflow text feeds & photos log.") },
+    { id: "quake_map", title: getTranslation(lang, "title_ws_quake_map", "Quakemap Action Grid"), icon: Map, spec: "Image 5", desc: getTranslation(lang, "desc_ws_quake_map", "Himalayan seismic emergency relief hub, demand tracking and pin overlays.") },
+    { id: "met_disaster", title: getTranslation(lang, "title_ws_met_disaster", "MetDisaster Radar Hub"), icon: Calendar, spec: "Image 7", desc: getTranslation(lang, "desc_ws_met_disaster", "Weather forecasting schedule calendars, hourly service statuses & trendlines.") },
+    { id: "apsdma_gis", title: getTranslation(lang, "title_ws_apsdma_gis", "APSDMA GIS Decision System"), icon: CloudLightning, spec: "Image 9", desc: getTranslation(lang, "desc_ws_apsdma_gis", "Multi-layered live vectors including reservoirs, lightning and tropical cyclone paths.") },
+    { id: "deep_sea_fleet", title: getTranslation(lang, "title_ws_deep_sea_fleet", "Deep Sea Fleet Cockpit"), icon: TrendingUp, spec: "Image 10", desc: getTranslation(lang, "desc_ws_deep_sea_fleet", "Commercial yacht overconsumption analytics, smooth fuel curves and mechanical alerts.") },
+    { id: "ocean_saas", title: getTranslation(lang, "title_ws_ocean_saas", "Ocean Enterprise Portal"), icon: ArrowUpRight, spec: "Image 8", desc: getTranslation(lang, "desc_ws_ocean_saas", "State-of-the-art SaaS product showcase with live carousel mockup headers.") },
   ];
 
   // Helper custom icon since lucide might not export WaverIcon
@@ -639,14 +641,14 @@ export default function IntegratedWorkspaces() {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-[10px] font-mono font-black text-cyan-400 uppercase tracking-widest bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-800/10">
-              NASA-INTEGRATED MULTI-CORE WORKSPACE
+              {getTranslation(lang, "nasa_integrated", "NASA-INTEGRATED MULTI-CORE WORKSPACE")}
             </span>
           </div>
           <h2 className="text-2xl font-black font-heading tracking-tight mt-1 text-slate-100">
-            Expert Operational Intelligence Center
+            {getTranslation(lang, "expert_oper_center", "Expert Operational Intelligence Centre")}
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Interfacing real high-fidelity dummy data with professional marine and meteorology overlays mirroring visual presets.
+            {getTranslation(lang, "expert_oper_desc", "Interfacing real high-fidelity dummy data with professional marine and meteorology overlays mirroring visual presets.")}
           </p>
         </div>
 

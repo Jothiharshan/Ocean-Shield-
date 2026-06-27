@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { User, HazardReport, ActiveAlert, HazardCategory, VerificationStatus, UserRole, SeverityLevel } from "../types";
+import { getTranslation, formatDateUTC } from "../utils/translations";
 import {
   Grid,
   FileText,
@@ -40,9 +41,11 @@ interface CitizenDashboardProps {
   currentUser: User;
   onNavigate: (tab: string) => void;
   onDeleteReport?: (id: string) => void;
+  globalLang?: string;
 }
 
-export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onDeleteReport }: CitizenDashboardProps) {
+export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onDeleteReport, globalLang }: CitizenDashboardProps) {
+  const lang = globalLang || "English";
   // Filter reports submitted by this citizen
   const citizenReports = reports.filter(r => r.reportedBy === currentUser.name || r.reportedBy === currentUser.id || r.reportedBy.toLowerCase().includes("jothi"));
   
@@ -55,9 +58,9 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
         </div>
         <div className="space-y-2 max-w-2xl">
           <span className="text-[10px] text-cyan-405 font-mono font-bold tracking-widest uppercase">Verified Sighting Observer</span>
-          <h2 className="text-2xl font-black font-heading text-slate-100">Welcome back, {currentUser.name}!</h2>
+          <h2 className="text-2xl font-black font-heading text-slate-100">{getTranslation(lang, "welcome_citizen", `Welcome back, ${currentUser.name}!`)}</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Thank you for helping look after our coastlines. As an active Citizen tracker, your reports feeding our hydrographic telemetry are reviewed by coastal scientists and emergency crews in real-time.
+            {getTranslation(lang, "desc_citizen", "Monitor local coastal conditions, receive dynamic weather signals, check satellite imagery alerts, and file hazard observations directly to safety networks.")}
           </p>
           <div className="flex flex-wrap gap-2 pt-2">
             <span className="text-[10px] bg-cyan-950/65 border border-cyan-850 text-cyan-400 px-3 py-1 pb-1.5 rounded-full font-mono font-bold uppercase">
@@ -81,24 +84,24 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
           <div className="flex items-center justify-between pb-3 border-b border-slate-850">
             <h3 className="text-xs font-bold font-mono uppercase text-slate-100 tracking-wider flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-cyan-400" />
-              <span>My Sighting Reports ({citizenReports.length})</span>
+              <span>{getTranslation(lang, "my_sighting_reports", "My Sighting Reports")} ({citizenReports.length})</span>
             </h3>
             <button 
               onClick={() => onNavigate("report")}
               className="text-[10px] font-mono font-black text-cyan-405 uppercase hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>+ FILE NEW REPORT</span>
+              <span>{getTranslation(lang, "file_new_report", "+ FILE NEW REPORT")}</span>
             </button>
           </div>
 
           {citizenReports.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-500 font-mono space-y-3">
-              <p>You haven't dispatched any ocean hazard reports yet.</p>
+              <p>{getTranslation(lang, "no_reports_yet", "You haven't dispatched any ocean hazard reports yet.")}</p>
               <button 
                 onClick={() => onNavigate("report")}
                 className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 font-bold text-xs text-slate-950 rounded-xl transition cursor-pointer"
               >
-                Launch Sighting Scribe
+                {getTranslation(lang, "launch_scribe", "Launch Sighting Scribe")}
               </button>
             </div>
           ) : (
@@ -130,7 +133,7 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
                         <MapPin className="w-3 h-3 text-cyan-500/60" /> {report.locationName}
                       </span>
                       <span>•</span>
-                      <span>{new Date(report.reportedAt).toLocaleDateString()}</span>
+                      <span>{formatDateUTC(report.reportedAt)}</span>
                     </div>
                   </div>
                   {onDeleteReport && (
@@ -155,10 +158,10 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
           <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-xl space-y-4">
             <h3 className="text-xs font-bold font-mono uppercase text-slate-100 tracking-wider flex items-center gap-1.5">
               <Bot className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span>CO-PILOT CONVERSATIONAL DISPATCH</span>
+              <span>{getTranslation(lang, "copilot_dispatch", "CO-PILOT CONVERSATIONAL DISPATCH")}</span>
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Have questions about ocean toxic blooms, local marine wind currents, beach erosion, or need to draft rapid response steps? Just ask OceanShield AI below:
+              {getTranslation(lang, "copilot_desc", "Have questions about ocean toxic blooms, local marine wind currents, beach erosion, or need to draft rapid response steps? Just ask OceanShield AI below:")}
             </p>
             <button
               onClick={() => onNavigate("assistant")}
@@ -166,7 +169,7 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
             >
               <span className="flex items-center gap-2">
                 <Bot className="w-4 h-4 text-cyan-400" />
-                <span>Ask: "How do I deal with oil slicks on coast?"</span>
+                <span>{getTranslation(lang, "ask_ai_placeholder", 'Ask: "How do I deal with oil slicks on coast?"')}</span>
               </span>
               <ArrowRight className="w-4 h-4 text-cyan-500" />
             </button>
@@ -177,7 +180,7 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
             <div className="space-y-3">
               <h3 className="text-xs font-bold font-mono uppercase text-slate-100 tracking-wider flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-orange-400" />
-                <span>Broadcasting advisories ({alerts.length})</span>
+                <span>{getTranslation(lang, "broadcasting_advisories", "Broadcasting advisories")} ({alerts.length})</span>
               </h3>
               
               <div className="space-y-2.5 max-h-[180px] overflow-y-auto pr-1">
@@ -202,7 +205,7 @@ export function CitizenDashboard({ reports, alerts, currentUser, onNavigate, onD
               onClick={() => onNavigate("alerts")}
               className="w-full bg-cyan-550/10 hover:bg-cyan-550/20 text-cyan-405 font-mono text-xs font-bold py-2 rounded-xl border border-cyan-800/10 transition cursor-pointer"
             >
-              VIEW ALL DISPATCHES ➔
+              {getTranslation(lang, "view_all_dispatches", "VIEW ALL DISPATCHES ➔")}
             </button>
           </div>
 
@@ -221,9 +224,11 @@ interface FishermanDashboardProps {
   reports: HazardReport[];
   alerts: ActiveAlert[];
   onNavigate: (tab: string) => void;
+  globalLang?: string;
 }
 
-export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDashboardProps) {
+export function FishermanDashboard({ reports, alerts, onNavigate, globalLang }: FishermanDashboardProps) {
+  const lang = globalLang || "English";
   // Safe zone voyage router state
   const [origin, setOrigin] = useState("Sanctuary Zone A-1");
   const [destination, setDestination] = useState("Delta Sector Cod Grounds");
@@ -269,9 +274,9 @@ export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDas
         </div>
         <div className="space-y-1.5 max-w-2xl">
           <span className="text-[10px] text-teal-400 font-mono font-bold tracking-widest uppercase">Safe Maritime Passage System</span>
-          <h2 className="text-2xl font-black font-heading text-slate-100">Welcome, Crew Fisherman!</h2>
+          <h2 className="text-2xl font-black font-heading text-slate-100">{getTranslation(lang, "welcome_fisherman", "Welcome, Crew Fisherman!")}</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Monitor real-time marine conditions, satellite weather advisories, coral reef barriers, and calculate voyage safety coefficients before casting your nets.
+            {getTranslation(lang, "desc_fisherman", "Monitor real-time marine conditions, satellite weather advisories, coral reef barriers, and calculate voyage safety coefficients before casting your nets.")}
           </p>
         </div>
       </div>
@@ -283,14 +288,14 @@ export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDas
           <div className="pb-3 border-b border-slate-850">
             <h3 className="text-xs font-bold font-mono uppercase text-teal-400 tracking-wider flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-teal-400" />
-              <span>Route Safety & Risk Calculator</span>
+              <span>{getTranslation(lang, "route_safety_calc", "Route Safety & Risk Calculator")}</span>
             </h3>
           </div>
 
           <form onSubmit={calculateRouteSafety} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-450 uppercase font-bold">Planned Voyage Origin</label>
+                <label className="text-[10px] font-mono text-slate-450 uppercase font-bold">{getTranslation(lang, "planned_voyage_origin", "Planned Voyage Origin")}</label>
                 <input 
                   type="text" 
                   value={origin}
@@ -299,7 +304,7 @@ export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDas
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-450 uppercase font-bold">Destination Sighting Quadrant</label>
+                <label className="text-[10px] font-mono text-slate-450 uppercase font-bold">{getTranslation(lang, "destination_quadrant", "Destination Sighting Quadrant")}</label>
                 <input 
                   type="text" 
                   value={destination}
@@ -314,7 +319,7 @@ export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDas
               disabled={isComputingRoute}
               className="w-full py-3 bg-teal-500 hover:bg-teal-600 font-extrabold text-xs text-slate-950 rounded-xl transition cursor-pointer select-none font-heading uppercase tracking-wider"
             >
-              {isComputingRoute ? "Synthesizing safe maritime vectors..." : "Run Corridor Safety Diagnostics"}
+              {isComputingRoute ? getTranslation(lang, "synthesizing_vectors", "Synthesizing safe maritime vectors...") : getTranslation(lang, "run_diagnostics", "Run Corridor Safety Diagnostics")}
             </button>
           </form>
 
@@ -323,19 +328,19 @@ export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDas
             <div className="bg-slate-955 border border-slate-850 rounded-xl p-4.5 space-y-3 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase">TELEMETRY RISK LEVEL</span>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase">{getTranslation(lang, "telemetry_risk_level", "TELEMETRY RISK LEVEL")}</span>
                   <p className={`text-xs font-black uppercase ${routeResult.riskScore > 35 ? "text-orange-400" : "text-emerald-400"}`}>
                     {routeResult.safetyRating}
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase">RISK INDEX</span>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase">{getTranslation(lang, "risk_index", "RISK INDEX")}</span>
                   <p className="text-lg font-mono font-black text-slate-100">{routeResult.riskScore}%</p>
                 </div>
               </div>
 
               <div className="text-xs text-slate-400 border-t border-slate-855 pt-3 leading-relaxed">
-                <strong>TACTICAL DEVIATION WORKFLOW:</strong> <br />
+                <strong>{getTranslation(lang, "tactical_deviation", "TACTICAL DEVIATION WORKFLOW")}:</strong> <br />
                 {routeResult.recommendedCourse}
               </div>
             </div>
@@ -347,7 +352,7 @@ export function FishermanDashboard({ reports, alerts, onNavigate }: FishermanDas
           <div className="bg-slate-900 border border-slate-850 rounded-2xl p-5 shadow-xl text-left space-y-3">
             <h3 className="text-xs font-bold font-mono uppercase text-slate-100 tracking-wider flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />
-              <span>Nearby Sea Hazard Feeds</span>
+              <span>{getTranslation(lang, "nearby_hazards", "Nearby Sea Hazard Feeds")}</span>
             </h3>
 
             <div className="space-y-3 overflow-y-auto max-h-[300px] pr-1">
@@ -378,9 +383,11 @@ interface ResearcherDashboardProps {
   reports: HazardReport[];
   alerts: ActiveAlert[];
   onNavigate: (tab: string) => void;
+  globalLang?: string;
 }
 
-export function ResearcherDashboard({ reports, alerts, onNavigate }: ResearcherDashboardProps) {
+export function ResearcherDashboard({ reports, alerts, onNavigate, globalLang }: ResearcherDashboardProps) {
+  const lang = globalLang || "English";
   const severeWeather = reports.filter(r => r.category === "severe_weather").length;
   const oilSpill = reports.filter(r => r.category === "oil_spill").length;
   const coralBleaching = reports.filter(r => r.category === "coral_bleaching").length;
@@ -395,9 +402,9 @@ export function ResearcherDashboard({ reports, alerts, onNavigate }: ResearcherD
         </div>
         <div className="space-y-1.5 max-w-2xl">
           <span className="text-[10px] text-violet-400 font-mono font-bold tracking-widest uppercase">Marine Thermal Bio Diagnostic Console</span>
-          <h2 className="text-2xl font-black font-heading text-slate-100">Academic Explorer Cockpit</h2>
+          <h2 className="text-2xl font-black font-heading text-slate-100">{getTranslation(lang, "welcome_researcher", "Welcome, Marine Researcher!")}</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Synthesize oceanic crowdsourced datasets, view heatwaves trend models, extract structural CSV datasets, and review academic insights dynamically.
+            {getTranslation(lang, "desc_researcher", "Access ocean telemetry streams, analyse computed plumes, export multi-spectral database files, and run statistical algorithms on hazard vectors.")}
           </p>
         </div>
       </div>
@@ -498,9 +505,11 @@ interface AuthorityDashboardProps {
   alerts: ActiveAlert[];
   onNavigate: (tab: string) => void;
   onUpdateReportStatus: (id: string, status: VerificationStatus, confidenceBoost?: number) => void;
+  globalLang?: string;
 }
 
-export function AuthorityDashboard({ reports, alerts, onNavigate, onUpdateReportStatus }: AuthorityDashboardProps) {
+export function AuthorityDashboard({ reports, alerts, onNavigate, onUpdateReportStatus, globalLang }: AuthorityDashboardProps) {
+  const lang = globalLang || "English";
   const pendingReports = reports.filter(r => r.status === "Pending");
   const verifiedReports = reports.filter(r => r.status === "Verified");
   const criticAlerts = alerts.filter(a => a.severity === "Critical");
@@ -524,6 +533,20 @@ export function AuthorityDashboard({ reports, alerts, onNavigate, onUpdateReport
           </button>
         </div>
       )}
+
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-cyan-950/40 via-slate-900 to-indigo-950/20 border border-cyan-500/20 p-6 rounded-3xl text-left relative overflow-hidden shadow-lg animate-fade-in">
+        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+          <ShieldCheck className="w-32 h-32 text-teal-400 rotate-12" />
+        </div>
+        <div className="space-y-1.5 max-w-2xl">
+          <span className="text-[10px] text-teal-400 font-mono font-bold tracking-widest uppercase">Marine Dispatch Command Center</span>
+          <h2 className="text-2xl font-black font-heading text-slate-100">{getTranslation(lang, "welcome_authority", "Welcome, Safety Dispatcher!")}</h2>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            {getTranslation(lang, "desc_authority", "Review citizen hazard files, broadcast automated safety alerts, coordinate response teams, and dispatch real-time emergency notifications.")}
+          </p>
+        </div>
+      </div>
 
       {/* Grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -624,9 +647,11 @@ interface AdminDashboardProps {
   alerts: ActiveAlert[];
   currentUser: User;
   onNavigate: (tab: string) => void;
+  globalLang?: string;
 }
 
-export function AdminDashboard({ reports, alerts, currentUser, onNavigate }: AdminDashboardProps) {
+export function AdminDashboard({ reports, alerts, currentUser, onNavigate, globalLang }: AdminDashboardProps) {
+  const lang = globalLang || "English";
   return (
     <div className="space-y-6 text-left">
       {/* Welcome Board */}
@@ -639,9 +664,9 @@ export function AdminDashboard({ reports, alerts, currentUser, onNavigate }: Adm
             <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
             <span>ROOT ADMINISTRATOR CLEARANCE ACCESS CODE ACTIVE</span>
           </span>
-          <h2 className="text-2xl font-black font-heading text-slate-100">System Core Cockpit</h2>
+          <h2 className="text-2xl font-black font-heading text-slate-100">{getTranslation(lang, "welcome_admin", "Welcome, System Administrator!")}</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Admin console provides total management coordinates override, artificial core tuning, diagnostic monitoring, and developer override settings.
+            {getTranslation(lang, "desc_admin", "Manage user accounts, adjust system configuration values, monitor dev server telemetry logs, and inspect deep database collections.")}
           </p>
         </div>
       </div>
@@ -717,9 +742,10 @@ export function AdminDashboard({ reports, alerts, currentUser, onNavigate }: Adm
 interface UsersGuestAdminProps {
   onUpdateRole: (role: UserRole) => void;
   currentRole: UserRole;
+  lang?: string;
 }
 
-export function UsersAdminPanel({ onUpdateRole, currentRole }: UsersGuestAdminProps) {
+export function UsersAdminPanel({ onUpdateRole, currentRole, lang = "English" }: UsersGuestAdminProps) {
   const usersList = [
     { name: "Jothi Harshan D K (You)", email: "jothi@oceanshield.org", role: currentRole, key: "OS-SEC-944" },
     { name: "Prof. Clara Vane", email: "clara.v@coastal-lab.edu", role: "Researcher", key: "OS-ACAD-042" },
@@ -733,20 +759,20 @@ export function UsersAdminPanel({ onUpdateRole, currentRole }: UsersGuestAdminPr
       <div className="border-b border-slate-850 pb-3">
         <h3 className="font-bold text-slate-100 font-heading text-lg uppercase flex items-center gap-2">
           <UserCheck className="w-5 h-5 text-cyan-405" />
-          <span>Active Observer Registry Accounts</span>
+          <span>{getTranslation(lang, "active_observer_registry_accounts", "Active Observer Registry Accounts")}</span>
         </h3>
-        <p className="text-xs text-slate-400">Manage digital clearances and alter operational privileges for active crews on OceanShield.</p>
+        <p className="text-xs text-slate-400">{getTranslation(lang, "manage_digital_clearances", "Manage digital clearances and alter operational privileges for active crews on OceanShield.")}</p>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-slate-850">
         <table className="w-full border-collapse font-sans text-xs text-left">
           <thead>
             <tr className="bg-slate-950 font-mono text-[10px] text-slate-450 uppercase border-b border-slate-855">
-              <th className="p-4">Name</th>
-              <th className="p-4">Email Address</th>
-              <th className="p-4">Authorization Key</th>
-              <th className="p-4">Assigned Clearance Scope</th>
-              <th className="p-4 text-center">Modify Clearance</th>
+              <th className="p-4">{getTranslation(lang, "table_header_name", "Name")}</th>
+              <th className="p-4">{getTranslation(lang, "table_header_email", "Email Address")}</th>
+              <th className="p-4">{getTranslation(lang, "table_header_auth_key", "Authorization Key")}</th>
+              <th className="p-4">{getTranslation(lang, "table_header_assigned_clearance", "Assigned Clearance Scope")}</th>
+              <th className="p-4 text-center">{getTranslation(lang, "table_header_modify_clearance", "Modify Clearance")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-855 text-slate-300">
@@ -871,15 +897,15 @@ export function AIConfigPanel() {
 }
 
 
+// =====================// 8. EXTRA VOYAGER SAFE ZONES PANEL
 // ==========================================
-// 8. EXTRA VOYAGER SAFE ZONES PANEL
-// ==========================================
-export function SafeZonesPanel({ reports }: { reports: HazardReport[] }) {
+export function SafeZonesPanel({ reports, globalLang }: { reports: HazardReport[]; globalLang?: string }) {
+  const lang = globalLang || "English";
   const customZones = [
-    { name: "Zone Bravo Anchorages", risk: "Low Risk", status: "Cleansed Corridor", lat: 14.24, lng: 120.45 },
-    { name: "Echo-7 Fragile Reef Sanctuary", risk: "Elevated Sea Temp", status: "Thermal Alert active", lat: 14.54, lng: 121.12 },
-    { name: "Delta-3 Petroleum Sector", risk: "Spill Slick tracking", status: "Closed for Fishing", lat: 14.12, lng: 120.15 },
-    { name: "Sector Foxtrot Clam Nursery", risk: "Harmful Algae susp", status: "Harvest Suspended", lat: 14.88, lng: 120.33 }
+    { name: getTranslation(lang, "zone_bravo", "Zone Bravo Anchorages"), risk: getTranslation(lang, "risk_low", "Low Risk"), status: getTranslation(lang, "status_cleansed", "Cleansed Corridor"), lat: 14.24, lng: 120.45 },
+    { name: getTranslation(lang, "zone_echo7", "Echo-7 Fragile Reef Sanctuary"), risk: getTranslation(lang, "risk_elevated", "Elevated Sea Temp"), status: getTranslation(lang, "status_thermal", "Thermal Alert active"), lat: 14.54, lng: 121.12 },
+    { name: getTranslation(lang, "zone_delta3", "Delta-3 Petroleum Sector"), risk: getTranslation(lang, "risk_spill", "Spill Slick tracking"), status: getTranslation(lang, "status_closed", "Closed for Fishing"), lat: 14.12, lng: 120.15 },
+    { name: getTranslation(lang, "zone_foxtrot", "Sector Foxtrot Clam Nursery"), risk: getTranslation(lang, "risk_algae", "Harmful Algae susp"), status: getTranslation(lang, "status_suspended", "Harvest Suspended"), lat: 14.88, lng: 120.33 }
   ];
 
   return (
@@ -887,9 +913,9 @@ export function SafeZonesPanel({ reports }: { reports: HazardReport[] }) {
       <div className="border-b border-slate-850 pb-3">
         <h3 className="font-bold text-slate-100 font-heading text-lg uppercase flex items-center gap-2">
           <Layers className="w-5 h-5 text-emerald-400 animate-pulse" />
-          <span>Ocean Sanctuary Zones & Voyager Corridors</span>
+          <span>{getTranslation(lang, "title_safezones", "Ocean Sanctuary Zones & Voyager Corridors")}</span>
         </h3>
-        <p className="text-xs text-slate-400">Track biological stress levels, designated anchorages, and no-fishing conservation zones in Manila and Cavite sectors.</p>
+        <p className="text-xs text-slate-400">{getTranslation(lang, "desc_safezones", "Track biological stress levels, designated anchorages, and no-fishing conservation zones in Manila and Cavite sectors.")}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -920,7 +946,8 @@ export function SafeZonesPanel({ reports }: { reports: HazardReport[] }) {
 // ==========================================
 // 9. EXTRA RESEARCH DATASET EXPORT PANEL
 // ==========================================
-export function ExportDataPanel({ reports }: { reports: HazardReport[] }) {
+export function ExportDataPanel({ reports, globalLang }: { reports: HazardReport[]; globalLang?: string }) {
+  const lang = globalLang || "English";
   const [downloading, setDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
@@ -950,9 +977,9 @@ export function ExportDataPanel({ reports }: { reports: HazardReport[] }) {
       <div className="border-b border-slate-850 pb-3">
         <h3 className="font-bold text-slate-100 font-heading text-lg uppercase flex items-center gap-2">
           <Database className="w-5 h-5 text-violet-405" />
-          <span>Scientific Siphoning & Dataset Export Panel</span>
+          <span>{getTranslation(lang, "title_export", "Scientific Siphoning & Dataset Export Panel")}</span>
         </h3>
-        <p className="text-xs text-slate-400">Download formatted crowdsourced reports, thermal SST datasets, and verified drift parameters for scientific telemetry studies.</p>
+        <p className="text-xs text-slate-400">{getTranslation(lang, "desc_export", "Download formatted crowdsourced reports, thermal SST datasets, and verified drift parameters for scientific telemetry studies.")}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -973,7 +1000,7 @@ export function ExportDataPanel({ reports }: { reports: HazardReport[] }) {
             className="w-full py-3 bg-violet-600 hover:bg-violet-755 text-slate-100 font-mono text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer select-none"
           >
             <Download className="w-4 h-4" /> 
-            {downloading ? "Compiling CSV..." : "Export as CSV Dataset"}
+            {downloading ? "Compiling CSV..." : getTranslation(lang, "btn_export_csv", "Export as CSV Dataset")}
           </button>
           <button 
             disabled={downloading}
@@ -981,7 +1008,7 @@ export function ExportDataPanel({ reports }: { reports: HazardReport[] }) {
             className="w-full py-3 bg-slate-950 hover:bg-slate-855 border border-slate-800 text-slate-300 font-mono text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer select-none"
           >
             <Download className="w-4 h-4" /> 
-            {downloading ? "Siphoning JSON..." : "Export as Schema JSON"}
+            {downloading ? "Siphoning JSON..." : getTranslation(lang, "btn_export_json", "Export as Schema JSON")}
           </button>
 
           {downloadSuccess && (
@@ -999,7 +1026,8 @@ export function ExportDataPanel({ reports }: { reports: HazardReport[] }) {
 // ==========================================
 // 10. EXTRA ACADEMIC INSIGHTS BULLETIN
 // ==========================================
-export function InsightsPanel() {
+export function InsightsPanel({ globalLang }: { globalLang?: string }) {
+  const lang = globalLang || "English";
   const bulletInsights = [
     {
       title: "Manila Bay Thermal Concentration Peak",
@@ -1023,9 +1051,9 @@ export function InsightsPanel() {
       <div className="border-b border-slate-850 pb-3">
         <h3 className="font-bold text-slate-100 font-heading text-lg uppercase flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-violet-400 animate-pulse" />
-          <span>Academic Sighting Insights & Core Analyses</span>
+          <span>{getTranslation(lang, "title_insights", "Academic Sighting Insights & Core Analyses")}</span>
         </h3>
-        <p className="text-xs text-slate-400">Autonomous scientific conclusions generated dynamically from marine hazard historical records.</p>
+        <p className="text-xs text-slate-400">{getTranslation(lang, "desc_insights", "Autonomous scientific conclusions generated dynamically from marine hazard historical records.")}</p>
       </div>
 
       <div className="space-y-4">
@@ -1043,7 +1071,6 @@ export function InsightsPanel() {
     </div>
   );
 }
-
 
 // ==========================================
 // 11. EXTRA ADMIN SYSTEM CONFIGS & SERVER HEALTH DIAGNOSTICS
